@@ -1,0 +1,85 @@
+package com.sahil.pfba.domain;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Objects;
+
+public class Expense {
+    private final String id;
+    private final String description;
+    private final BigDecimal amount;
+    private final Category category;
+    private final LocalDate date;
+
+    private Expense(Builder builder){
+        this.id=builder.id;
+        this.description = builder.description;
+        this.amount = builder.amount;
+        this.category = builder.category;
+        this.date = builder.date;
+    }
+    
+    public String getId(){
+        return id;
+    }
+    public String getDescription() {
+        return description;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public static class Builder {
+        private String id;
+        private String description;
+        private BigDecimal amount;
+        private Category category;
+        private LocalDate date;
+
+        public Builder id(String id){
+            this.id=id;
+            return this;
+
+        }
+
+        public Builder description(String description){
+            this.description=description;
+            return this;
+        }
+        public Builder amount(BigDecimal amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder category(Category category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public Expense build() {
+            Objects.requireNonNull(id, "id must not be null");
+            Objects.requireNonNull(amount, "amount must not be null");
+            Objects.requireNonNull(category, "category must not be null");
+            Objects.requireNonNull(date, "date must not be null");
+
+            return new Expense(this);
+        }
+    }
+
+
+    
+}
