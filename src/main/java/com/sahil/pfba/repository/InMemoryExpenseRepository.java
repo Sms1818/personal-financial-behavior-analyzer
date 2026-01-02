@@ -6,8 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Repository;
+
+import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 
+@Repository
 public class InMemoryExpenseRepository implements ExpenseRepository {
     private final Map<String, Expense> store=new ConcurrentHashMap<>();
 
@@ -23,10 +27,10 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
     }
 
     @Override
-    public List<Expense> findByCategory(String category){
+    public List<Expense> findByCategory(Category category){
         return store.values()
         .stream()
-        .filter(e->e.getCategory().name().equalsIgnoreCase(category))
+        .filter(e->e.getCategory()==category)
         .collect(Collectors.toList());
             
     }
