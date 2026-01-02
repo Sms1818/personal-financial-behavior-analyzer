@@ -68,3 +68,9 @@ PFBA is developed incrementally with a focus on:
 
 In active development  
 This project is being built incrementally with continuous improvements.
+
+## Progress
+
+- Day 1: Project setup, domain modeling, thread-safe repository
+- Day 2: Service layer, dependency injection, type safety improvements, domain identity
+
