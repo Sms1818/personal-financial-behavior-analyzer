@@ -73,4 +73,7 @@ This project is being built incrementally with continuous improvements.
 
 - Day 1: Project setup, domain modeling, thread-safe repository
 - Day 2: Service layer, dependency injection, type safety improvements, domain identity
+- Day 3: REST controllers, expense APIs, and DTO-based request handling
+
+
 
