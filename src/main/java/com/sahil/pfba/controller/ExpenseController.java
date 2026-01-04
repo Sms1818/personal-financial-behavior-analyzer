@@ -1,7 +1,9 @@
 package com.sahil.pfba.controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,8 @@ import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.service.ExpenseService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/expenses")
 public class ExpenseController {
@@ -28,7 +32,7 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<Expense> addExpense(@RequestBody CreateExpenseRequest request){
+    public ResponseEntity<Expense> addExpense(@Valid @RequestBody CreateExpenseRequest request){
         Expense expense=new Expense.Builder()
             .id(request.id)
             .description(request.description)
@@ -58,5 +62,12 @@ public class ExpenseController {
     public ResponseEntity<List<Expense>> getExpensesByDateRange(@RequestParam LocalDate start, @RequestParam LocalDate end){
         List<Expense> expenses=expenseService.getExpensesByDateRange(start, end);
         return ResponseEntity.ok(expenses);
+    }
+
+    @GetMapping("/analyze/total")
+    public CompletableFuture<ResponseEntity<BigDecimal>> getTotalSpendingAsync(){
+        return expenseService.analyzeTotalSpendingAsync()
+            .thenApply(total -> ResponseEntity.ok(total));
+
     }
 }
