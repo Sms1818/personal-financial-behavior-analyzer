@@ -7,15 +7,18 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sahil.pfba.controller.dto.CreateExpenseRequest;
+import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.service.ExpenseService;
@@ -69,5 +72,17 @@ public class ExpenseController {
         return expenseService.analyzeTotalSpendingAsync()
             .thenApply(total -> ResponseEntity.ok(total));
 
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Expense> updateExpense(@PathVariable String id, @Valid @RequestBody UpdateExpenseRequest request){
+        Expense updatedExpense=expenseService.updateExpense(id, request);
+        return ResponseEntity.ok(updatedExpense);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable String id){
+        expenseService.deleteExpense(id);
+        return ResponseEntity.noContent().build();
     }
 }

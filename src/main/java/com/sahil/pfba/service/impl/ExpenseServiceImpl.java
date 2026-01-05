@@ -8,8 +8,11 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.stereotype.Service;
 
 import com.sahil.pfba.analysis.SpendingAnalysisService;
+import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.domain.ExpenseStatus;
+import com.sahil.pfba.exception.InvalidExpenseOperationException;
 import com.sahil.pfba.repository.ExpenseRepository;
 import com.sahil.pfba.service.ExpenseService;
 
@@ -47,6 +50,46 @@ public class ExpenseServiceImpl implements ExpenseService {
     public CompletableFuture<BigDecimal> analyzeTotalSpendingAsync(){
         List<Expense> expenses=getAllExpenses();
         return spendingAnalysisService.calculateTotalSpending(expenses);
+    }
+
+    @Override
+    public Expense updateExpense(String id, UpdateExpenseRequest request){
+        Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
+
+        if(existing.getStatus()==ExpenseStatus.DELETED){
+            throw new InvalidExpenseOperationException("Cannot update a deleted expense");
+        }
+
+        Expense updated=new Expense.Builder()
+            .id(existing.getId())
+            .description(request.description)
+            .amount(request.amount)
+            .category(request.category)
+            .date(request.date)
+            .status(existing.getStatus())
+            .build();
+        
+        return expenseRepository.save(updated);
+
+    }
+
+    @Override
+    public void deleteExpense(String id){
+        Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
+        if(existing.getStatus()==ExpenseStatus.DELETED){
+            return;
+        }
+
+        Expense deleted=new Expense.Builder()
+            .id(existing.getId())
+            .description(existing.getDescription())
+            .amount(existing.getAmount())
+            .category(existing.getCategory())
+            .date(existing.getDate())
+            .status(ExpenseStatus.DELETED)
+            .build();
+        
+        expenseRepository.save(deleted);
     }
     
 }

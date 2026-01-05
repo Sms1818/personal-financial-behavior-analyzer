@@ -10,6 +10,7 @@ public class Expense {
     private final BigDecimal amount;
     private final Category category;
     private final LocalDate date;
+    private final ExpenseStatus status;
 
     private Expense(Builder builder){
         this.id=builder.id;
@@ -17,6 +18,7 @@ public class Expense {
         this.amount = builder.amount;
         this.category = builder.category;
         this.date = builder.date;
+        this.status=builder.status;
     }
     
     public String getId(){
@@ -38,12 +40,17 @@ public class Expense {
         return date;
     }
 
+    public ExpenseStatus getStatus() {
+        return status;
+    }
+
     public static class Builder {
         private String id;
         private String description;
         private BigDecimal amount;
         private Category category;
         private LocalDate date;
+        private ExpenseStatus status= ExpenseStatus.ACTIVE;
 
         public Builder id(String id){
             this.id=id;
@@ -70,12 +77,17 @@ public class Expense {
             return this;
         }
 
+        public Builder status(ExpenseStatus status) {
+            this.status = status;
+            return this;
+        }
+
         public Expense build() {
             Objects.requireNonNull(id, "id must not be null");
             Objects.requireNonNull(amount, "amount must not be null");
             Objects.requireNonNull(category, "category must not be null");
             Objects.requireNonNull(date, "date must not be null");
-
+            Objects.requireNonNull(status, "status must not be null");
             return new Expense(this);
         }
     }

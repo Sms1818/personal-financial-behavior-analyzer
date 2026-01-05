@@ -43,4 +43,11 @@ public class GlobalExceptionHandler {
                .status(HttpStatus.BAD_REQUEST)
                .body(apiError);
     }
+
+    @ExceptionHandler(InvalidExpenseOperationException.class)
+    public ResponseEntity<String> handleInvalidExpenseOperation(InvalidExpenseOperationException ex){
+        return ResponseEntity
+               .status(HttpStatus.CONFLICT)
+               .body(ex.getMessage());
+    }
 }
