@@ -11,6 +11,7 @@ public class Expense {
     private final Category category;
     private final LocalDate date;
     private final ExpenseStatus status;
+    private final int version;
 
     private Expense(Builder builder){
         this.id=builder.id;
@@ -19,6 +20,7 @@ public class Expense {
         this.category = builder.category;
         this.date = builder.date;
         this.status=builder.status;
+        this.version=builder.version;
     }
     
     public String getId(){
@@ -44,6 +46,10 @@ public class Expense {
         return status;
     }
 
+    public int getVersion(){
+        return version;
+    }
+
     public static class Builder {
         private String id;
         private String description;
@@ -51,6 +57,7 @@ public class Expense {
         private Category category;
         private LocalDate date;
         private ExpenseStatus status= ExpenseStatus.ACTIVE;
+        private int version=1;
 
         public Builder id(String id){
             this.id=id;
@@ -82,12 +89,20 @@ public class Expense {
             return this;
         }
 
+        public Builder version(int version){
+            this.version=version;
+            return this;
+        }
+
         public Expense build() {
             Objects.requireNonNull(id, "id must not be null");
             Objects.requireNonNull(amount, "amount must not be null");
             Objects.requireNonNull(category, "category must not be null");
             Objects.requireNonNull(date, "date must not be null");
             Objects.requireNonNull(status, "status must not be null");
+            if (version <= 0) {
+                throw new IllegalArgumentException("Version must be positive");
+            }
             return new Expense(this);
         }
     }

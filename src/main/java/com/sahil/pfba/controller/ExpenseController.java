@@ -85,4 +85,10 @@ public class ExpenseController {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<Expense>> getExpenseHistory(@PathVariable String id){
+        List<Expense> history=expenseService.getExpenseHistory(id);
+        return ResponseEntity.ok(history);
+    }
 }

@@ -113,5 +113,7 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 3:** REST controllers, expense APIs, and DTO-based request handling  
 - **Day 4:** API validation, global exception handling, async spending analysis with custom thread pool  
 - **Day 5:** Completed full CRUD operations with immutable updates, soft delete using lifecycle states, and proper HTTP error semantics
+- **Day 6:** Implemented immutable expense versioning with full audit trail, history APIs
+
 
 

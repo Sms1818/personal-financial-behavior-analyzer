@@ -48,6 +48,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public CompletableFuture<BigDecimal> analyzeTotalSpendingAsync(){
+        // Analysis always runs on latest ACTIVE expense versions only
         List<Expense> expenses=getAllExpenses();
         return spendingAnalysisService.calculateTotalSpending(expenses);
     }
@@ -67,6 +68,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             .category(request.category)
             .date(request.date)
             .status(existing.getStatus())
+            .version(existing.getVersion()+1)
             .build();
         
         return expenseRepository.save(updated);
@@ -90,6 +92,11 @@ public class ExpenseServiceImpl implements ExpenseService {
             .build();
         
         expenseRepository.save(deleted);
+    }
+
+    @Override
+    public List<Expense> getExpenseHistory(String id){
+        return expenseRepository.findHistoryById(id);
     }
     
 }
