@@ -102,6 +102,9 @@ PFBA is developed incrementally with a strong focus on:
 - Understanding system design trade-offs
 - Demonstrating concurrency, async processing, and clean architecture
 - Building features intentionally rather than artificially
+- CSV bulk imports are processed asynchronously using a dedicated executor to ensure that API threads remain non-blocking and scalable under large uploads.
+
+
 
 ---
 
@@ -114,6 +117,7 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 4:** API validation, global exception handling, async spending analysis with custom thread pool  
 - **Day 5:** Completed full CRUD operations with immutable updates, soft delete using lifecycle states, and proper HTTP error semantics
 - **Day 6:** Implemented immutable expense versioning with full audit trail, history APIs
+- **Day 7:** Bulk CSV expense import with validation, partial failure handling, and asynchronous background processing
 
 
 

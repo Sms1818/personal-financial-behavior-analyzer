@@ -98,5 +98,13 @@ public class ExpenseServiceImpl implements ExpenseService {
     public List<Expense> getExpenseHistory(String id){
         return expenseRepository.findHistoryById(id);
     }
-    
+
+    @Override
+    public void saveAllExpenses(List<Expense> expenses) {
+        if (expenses == null || expenses.isEmpty()) {
+            return;
+        }
+        expenseRepository.saveAll(expenses);
+    }
+
 }

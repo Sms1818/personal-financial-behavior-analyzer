@@ -18,5 +18,7 @@ public interface ExpenseService {
     CompletableFuture<BigDecimal> analyzeTotalSpendingAsync();
     void deleteExpense(String id);
     List<Expense> getExpenseHistory(String id);
+    void saveAllExpenses(List<Expense> expenses);
+    
 
 }

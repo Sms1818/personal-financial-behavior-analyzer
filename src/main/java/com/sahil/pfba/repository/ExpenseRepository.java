@@ -14,4 +14,5 @@ public interface ExpenseRepository {
     List<Expense> findHistoryById(String id);
     List<Expense> findByCategory(Category category);
     List<Expense> findByDateRange(LocalDate start, LocalDate end);
+    void saveAll(List<Expense> expenses);
 }

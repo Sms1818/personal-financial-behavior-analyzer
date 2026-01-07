@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.sahil.pfba.bulk.CsvExpenseUploadService;
 import com.sahil.pfba.controller.dto.CreateExpenseRequest;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
@@ -29,9 +31,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/expenses")
 public class ExpenseController {
     private final ExpenseService expenseService;
+    private final CsvExpenseUploadService csvExpenseUploadService;
 
-    public ExpenseController(ExpenseService expenseService) {
+    public ExpenseController(ExpenseService expenseService, CsvExpenseUploadService csvExpenseUploadService) {
         this.expenseService = expenseService;
+        this.csvExpenseUploadService = csvExpenseUploadService;
     }
 
     @PostMapping
@@ -91,4 +95,11 @@ public class ExpenseController {
         List<Expense> history=expenseService.getExpenseHistory(id);
         return ResponseEntity.ok(history);
     }
+
+    @PostMapping(value="/import")
+    public ResponseEntity<String> importExpenses(@RequestParam("file") MultipartFile file){
+        csvExpenseUploadService.importAysnc(file);
+        return ResponseEntity.accepted().body("CSV import started successfully");
+    }
+
 }

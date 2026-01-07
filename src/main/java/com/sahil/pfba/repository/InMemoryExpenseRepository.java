@@ -67,5 +67,11 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
         .filter(e-> !e.getDate().isBefore(start) && !e.getDate().isAfter(end))
         .collect(Collectors.toList());
     }
+    @Override
+    public void saveAll(List<Expense> expenses) {
+        for (Expense expense : expenses) {
+            save(expense);
+        }
+    }
 
 }
