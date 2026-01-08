@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sahil.pfba.audit.ImportAudit;
+import com.sahil.pfba.audit.ImportAuditService;
+import com.sahil.pfba.audit.ImportType;
 import com.sahil.pfba.bulk.CsvExpenseUploadService;
 import com.sahil.pfba.controller.dto.CreateExpenseRequest;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
@@ -30,76 +33,94 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/expenses")
 public class ExpenseController {
+
     private final ExpenseService expenseService;
     private final CsvExpenseUploadService csvExpenseUploadService;
+    private final ImportAuditService auditService;
 
-    public ExpenseController(ExpenseService expenseService, CsvExpenseUploadService csvExpenseUploadService) {
+    public ExpenseController(
+            ExpenseService expenseService,
+            CsvExpenseUploadService csvExpenseUploadService,
+            ImportAuditService auditService) {
+
         this.expenseService = expenseService;
         this.csvExpenseUploadService = csvExpenseUploadService;
+        this.auditService = auditService;
     }
 
-    @PostMapping
-    public ResponseEntity<Expense> addExpense(@Valid @RequestBody CreateExpenseRequest request){
-        Expense expense=new Expense.Builder()
-            .id(request.id)
-            .description(request.description)
-            .amount(request.amount)
-            .category(request.category)
-            .date(request.date)
-            .build();
 
-        Expense savedExpense=expenseService.addExpense(expense);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedExpense);
-        
+    @PostMapping
+    public ResponseEntity<Expense> addExpense(
+            @Valid @RequestBody CreateExpenseRequest request) {
+
+        Expense expense = new Expense.Builder()
+                .id(request.id)
+                .description(request.description)
+                .amount(request.amount)
+                .category(request.category)
+                .date(request.date)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(expenseService.addExpense(expense));
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses(){
-        List<Expense> expenses=expenseService.getAllExpenses();
-        return ResponseEntity.ok(expenses);
+    public ResponseEntity<List<Expense>> getAllExpenses() {
+        return ResponseEntity.ok(expenseService.getAllExpenses());
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Expense>> getExpensesByCategory(@PathVariable Category category){
-        List<Expense> expenses=expenseService.getExpensesByCategory(category);
-        return ResponseEntity.ok(expenses);
+    public ResponseEntity<List<Expense>> getExpensesByCategory(
+            @PathVariable Category category) {
+
+        return ResponseEntity.ok(expenseService.getExpensesByCategory(category));
     }
 
     @GetMapping("/range")
-    public ResponseEntity<List<Expense>> getExpensesByDateRange(@RequestParam LocalDate start, @RequestParam LocalDate end){
-        List<Expense> expenses=expenseService.getExpensesByDateRange(start, end);
-        return ResponseEntity.ok(expenses);
-    }
+    public ResponseEntity<List<Expense>> getExpensesByDateRange(
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end) {
 
-    @GetMapping("/analyze/total")
-    public CompletableFuture<ResponseEntity<BigDecimal>> getTotalSpendingAsync(){
-        return expenseService.analyzeTotalSpendingAsync()
-            .thenApply(total -> ResponseEntity.ok(total));
-
+        return ResponseEntity.ok(
+                expenseService.getExpensesByDateRange(start, end));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable String id, @Valid @RequestBody UpdateExpenseRequest request){
-        Expense updatedExpense=expenseService.updateExpense(id, request);
-        return ResponseEntity.ok(updatedExpense);
+    public ResponseEntity<Expense> updateExpense(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateExpenseRequest request) {
+
+        return ResponseEntity.ok(expenseService.updateExpense(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable String id){
+    public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/history")
-    public ResponseEntity<List<Expense>> getExpenseHistory(@PathVariable String id){
-        List<Expense> history=expenseService.getExpenseHistory(id);
-        return ResponseEntity.ok(history);
+
+    @GetMapping("/analyze/total")
+    public CompletableFuture<ResponseEntity<BigDecimal>> getTotalSpendingAsync() {
+        return expenseService.analyzeTotalSpendingAsync()
+                .thenApply(ResponseEntity::ok);
     }
 
-    @PostMapping(value="/import")
-    public ResponseEntity<String> importExpenses(@RequestParam("file") MultipartFile file){
-        csvExpenseUploadService.importAysnc(file);
-        return ResponseEntity.accepted().body("CSV import started successfully");
-    }
+    @PostMapping("/import")
+    public ResponseEntity<String> importExpenses(
+            @RequestParam("file") MultipartFile file) {
 
+        ImportAudit audit = auditService.startAudit(
+                file.getOriginalFilename(),
+                ImportType.CSV
+        );
+
+        csvExpenseUploadService.importAsync(file, audit);
+
+        return ResponseEntity
+                .accepted()
+                .body("Import started. Audit ID: " + audit.getId());
+    }
 }

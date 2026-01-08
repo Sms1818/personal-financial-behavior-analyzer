@@ -7,12 +7,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sahil.pfba.audit.ImportAudit;
+import com.sahil.pfba.audit.ImportAuditService;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
@@ -21,28 +22,43 @@ import com.sahil.pfba.service.ExpenseService;
 @Service
 public class CsvExpenseUploadService {
     private final ExpenseService expenseService;
+    private final ImportAuditService auditService;
 
-    public CsvExpenseUploadService(ExpenseService expenseService) {
+    public CsvExpenseUploadService(ExpenseService expenseService, ImportAuditService auditService) {
         this.expenseService = expenseService;
+        this.auditService = auditService;
     }
 
     @Async("analysisExecutor")
-    public CompletableFuture<BulkUploadResult> importAysnc(MultipartFile file){
+    public void importAsync(MultipartFile file, ImportAudit audit){
         System.out.println(
             "CSV import running on thread: " + Thread.currentThread().getName()
         );
-        BulkUploadResult result = parse(file);
-        expenseService.saveAllExpenses(result.getValidExpenses());
-        return CompletableFuture.completedFuture(result);
+        try{
+            BulkUploadResult result = parse(file);
+            expenseService.saveAllExpenses(result.getValidExpenses());
+            auditService.completeAudit(
+                audit,
+                result.getTotalRecords(),
+                result.getValidExpenses().size(),
+                result.getErrors().size()
+            );
+    
+        } catch(Exception e){
+            auditService.failAudit(audit);
+            throw e;
+        }
     }
 
     public BulkUploadResult parse(MultipartFile file){
         List<Expense> validExpenses=new ArrayList<>();
         List<BulkUploadError> errors = new ArrayList<>();
 
+        int rowNumber=0;
+
         try (BufferedReader reader=new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
-            int rowNumber=0;
+            
             while((line=reader.readLine())!=null){
                 rowNumber++;
                 if(rowNumber==1) continue;
@@ -60,7 +76,7 @@ public class CsvExpenseUploadService {
             throw new RuntimeException("Failed to read CSV file");
             
         }
-        return new BulkUploadResult(validExpenses,errors);
+        return new BulkUploadResult(rowNumber-1,validExpenses,errors);
     
     }
     private Expense parseLine(String line) {
