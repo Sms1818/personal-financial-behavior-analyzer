@@ -29,5 +29,28 @@ public class InsightRepository {
             .filter(insight->insight.getStatus()==InsightStatus.ACTIVE)
             .toList();
     }
+
+    public Optional<Insight> findByTypeAndMessage(InsightType type, String message){
+        return store.values()
+            .stream()
+            .filter(insight->insight.getType()==type && insight.getMessage().equals(message))
+            .findFirst();
+    }
+
+    public void updateInsightStatus(String insightId,InsightStatus status){
+        Insight existing=store.get(insightId);
+        if(existing==null){
+            return;
+        }
+        Insight updated=new Insight.Builder()
+                .id(existing.getId())
+                .type(existing.getType())
+                .status(status)
+                .severity(existing.getSeverity())
+                .message(existing.getMessage())
+                .build();
+        
+        store.put(insightId,updated);
+    }
     
 }
