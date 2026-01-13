@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sahil.pfba.insights.Insight;
+import com.sahil.pfba.insights.InsightExplanationService;
 import com.sahil.pfba.insights.InsightGenerationService;
 import com.sahil.pfba.insights.InsightRepository;
 import com.sahil.pfba.insights.InsightStatus;
@@ -20,10 +21,12 @@ import com.sahil.pfba.insights.InsightStatus;
 public class InsightController {
     private final InsightGenerationService insightGenerationService;
     private final InsightRepository insightRepository;
+    private final InsightExplanationService insightExplanationService;
 
-    public InsightController(InsightGenerationService insightGenerationService, InsightRepository insightRepository) {
+    public InsightController(InsightGenerationService insightGenerationService, InsightRepository insightRepository, InsightExplanationService insightExplanationService) {
         this.insightGenerationService = insightGenerationService;
         this.insightRepository = insightRepository;
+        this.insightExplanationService=insightExplanationService;
     }
 
     @PostMapping("/generate")
@@ -53,5 +56,12 @@ public class InsightController {
         insightRepository.updateInsightStatus(id, InsightStatus.DISMISSED);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/explanation")
+    public ResponseEntity<String> getInsightExplanation(@PathVariable String id) {
+        String explanation = insightExplanationService.getExplanation(id);
+        return ResponseEntity.ok(explanation);
+    }
+
 
 }

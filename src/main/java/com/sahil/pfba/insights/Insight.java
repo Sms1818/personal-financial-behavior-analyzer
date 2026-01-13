@@ -9,6 +9,8 @@ public class Insight {
     private final InsightStatus status;
     private final String message;
     private final LocalDateTime createdAt;
+    private final String explanation;
+
 
     private Insight(Builder builder){
         this.id = builder.id;
@@ -17,6 +19,7 @@ public class Insight {
         this.status = builder.status;
         this.message = builder.message;
         this.createdAt = builder.createdAt;
+        this.explanation=builder.explanation;
     }
 
     public String getId(){
@@ -38,6 +41,10 @@ public class Insight {
         return createdAt;
     }
 
+    public String getExplanation(){
+        return explanation;
+    }
+
     public static class Builder{
         private String id;
         private InsightType type;
@@ -45,6 +52,7 @@ public class Insight {
         private InsightStatus status= InsightStatus.ACTIVE;
         private String message;
         private LocalDateTime createdAt= LocalDateTime.now();
+        private String explanation;
 
         public Builder id(String id){
             this.id = id;
@@ -73,6 +81,10 @@ public class Insight {
 
         public Builder createdAt(LocalDateTime createdAt){
             this.createdAt = createdAt;
+            return this;
+        }
+        public Builder explanation(String explanation){
+            this.explanation=explanation;
             return this;
         }
 

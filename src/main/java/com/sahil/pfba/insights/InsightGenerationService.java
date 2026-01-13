@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.llm.LLMClient;
 import com.sahil.pfba.rules.InsightRule;
 import com.sahil.pfba.service.ExpenseService;
 
@@ -15,14 +16,17 @@ public class InsightGenerationService {
     private final ExpenseService expenseService;
     private final InsightRepository insightRepository;
     private final List<InsightRule> insightRules;
+    private final LLMClient llmClient;
 
     public InsightGenerationService(
         ExpenseService expenseService,
         InsightRepository insightRepository,
-        List<InsightRule> insightRules) {
+        List<InsightRule> insightRules,
+        LLMClient llmClient) {
     this.expenseService = expenseService;
     this.insightRepository = insightRepository;
     this.insightRules = insightRules;
+    this.llmClient=llmClient;
 }
     @Async("analysisExecutor")
     public void generateInsightsAsync(){
@@ -37,6 +41,7 @@ public class InsightGenerationService {
         }
 
         for(InsightRule rule:insightRules){
+            try{
             if(!rule.isApplicable(expenses)){
                 continue;
             }
@@ -59,10 +64,20 @@ public class InsightGenerationService {
                     .severity(escalatedSeverity)
                     .status(existing.getStatus())
                     .message(existing.getMessage())
+                    .explanation(existing.getExplanation())
                     .build();
                 
                 insightRepository.save(escalatedInsight);
                 continue;
+            }
+            String explanation = null;
+            try {
+                explanation = llmClient.generateExplanation(insight);
+            } catch (Exception e) {
+                System.err.println(
+                    "LLM failed for insight " + insight.getId() +
+                    ": " + e.getMessage()
+                );
             }
             Insight newInsight = new Insight.Builder()
                     .id(insight.getId())
@@ -70,9 +85,16 @@ public class InsightGenerationService {
                     .severity(InsightSeverity.LOW)
                     .status(InsightStatus.ACTIVE)
                     .message(insight.getMessage())
+                    .explanation(explanation)
                     .build();
 
             insightRepository.save(newInsight);
+        }catch(Exception e){
+            System.err.println(
+                "Insight rule failed: " + rule.getClass().getSimpleName() +
+                " due to: " + e.getMessage()
+            );
+        }
         }
         }
     
