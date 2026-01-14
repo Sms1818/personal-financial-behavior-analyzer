@@ -1,5 +1,6 @@
 package com.sahil.pfba.insights;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,22 @@ public class InsightRepository {
     public Optional<Insight> findById(String id){
         return Optional.ofNullable(store.get(id));
     }
+
+    public List<Insight> findByType(InsightType type){
+        return store.values()
+            .stream()
+            .filter(insight->insight.getType()==type)
+            .toList();
+    }
+
+   
+    public List<Insight> findByStatus(InsightStatus status) {
+        return store.values()
+                .stream()
+                .filter(i -> i.getStatus() == status)
+                .toList();
+    }
+
 
     public List<Insight> findActive(){
         return store.values()
@@ -48,6 +65,8 @@ public class InsightRepository {
                 .status(status)
                 .severity(existing.getSeverity())
                 .message(existing.getMessage())
+                .explanation(existing.getExplanation())
+                .lastEvaluatedAt(LocalDateTime.now())
                 .build();
         
         store.put(insightId,updated);

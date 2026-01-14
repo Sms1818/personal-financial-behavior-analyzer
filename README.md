@@ -122,6 +122,9 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 9:** Added intelligent insight foundation with domain modeling, persisted insights, rule-based total spending analysis, and read-only insight APIs
 - **Day 10:** Asynchronous insight generation with idempotency, lifecycle awareness, and severity escalation (LOW → MEDIUM → HIGH)
 -**Day 11:** Added LLM-based insight explanations with a pluggable LLMClient abstraction, mock support, and graceful fallback logic; attempted real LLM (OpenAI/Gemini) integration but deferred due to API/model compatibility issues
+- **Day 12:** Fixed issues in insight generation where duplicate records were being created, improved the insight lifecycle (ACTIVE → RESOLVED), refined severity escalation logic, and stabilized the LLM-based explanation flow with proper error handling
+
+
 
 
 

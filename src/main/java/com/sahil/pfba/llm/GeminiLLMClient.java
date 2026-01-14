@@ -17,30 +17,67 @@ public class GeminiLLMClient implements LLMClient {
     private final String apiKey;
 
     public GeminiLLMClient(
-        @Value("${llm.gemini.api-key}") String apiKey
+            WebClient.Builder webClientBuilder,
+            @Value("${llm.gemini.api-key}") String apiKey,
+            @Value("${llm.gemini.api-url:https://generativelanguage.googleapis.com}") String baseUrl
     ) {
         this.apiKey = apiKey;
-        this.webClient = WebClient.builder()
-            .baseUrl("https://generativelanguage.googleapis.com/v1beta")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
+        this.webClient = webClientBuilder
+                .baseUrl(baseUrl)
+                .build();
     }
 
     @Override
     public String generateExplanation(Insight insight) {
-        GeminiRequest request = GeminiRequest.fromInsight(insight);
+        String prompt = buildPrompt(insight);
 
-        GeminiResponse response = webClient.post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/models/gemini-pro:generateContent")
-                .queryParam("key", apiKey)
-                .build()
-            )
-            .bodyValue(request)
-            .retrieve()
-            .bodyToMono(GeminiResponse.class)
-            .block();
+        String requestBody = """
+            {
+              "contents": [
+                {
+                  "parts": [
+                    { "text": "%s" }
+                  ]
+                }
+              ]
+            }
+            """.formatted(prompt.replace("\"", "\\\""));
 
-        return response.getText();
+        String response = webClient.post()
+                .uri("/v1beta/models/gemini-2.0-flash:generateContent")
+                .header("X-goog-api-key", apiKey)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        return extractText(response);
+    }
+
+    private String buildPrompt(Insight insight) {
+        return """
+        You are a personal finance assistant.
+
+        Insight type: %s
+        Severity: %s
+        Message: %s
+
+        Explain this insight in clear, actionable language for a user.
+        """.formatted(
+                insight.getType(),
+                insight.getSeverity(),
+                insight.getMessage()
+        );
+    }
+
+    private String extractText(String rawResponse) {
+        // Simple extraction (good enough for now)
+        int idx = rawResponse.indexOf("\"text\"");
+        if (idx == -1) return null;
+
+        int start = rawResponse.indexOf(":", idx) + 1;
+        int end = rawResponse.indexOf("\"", start + 2);
+        return rawResponse.substring(start, end).replace("\"", "").trim();
     }
 }

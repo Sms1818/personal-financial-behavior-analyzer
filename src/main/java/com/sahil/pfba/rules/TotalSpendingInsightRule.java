@@ -13,6 +13,12 @@ import com.sahil.pfba.insights.InsightType;
 
 @Component
 public class TotalSpendingInsightRule implements InsightRule{
+
+    @Override
+    public InsightType getType() {
+        return InsightType.TOTAL_SPENDING;
+    }
+
     @Override
     public boolean isApplicable(List<Expense> expenses){
         return expenses!=null && !expenses.isEmpty();
@@ -30,5 +36,10 @@ public class TotalSpendingInsightRule implements InsightRule{
                 .severity(InsightSeverity.LOW)
                 .message("Total spending accross all the expenses is "+totalSpending)
                 .build();
+    }
+
+    @Override
+    public InsightSeverity initialSeverity() {
+        return InsightSeverity.LOW;
     }
 }

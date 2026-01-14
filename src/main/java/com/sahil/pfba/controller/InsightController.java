@@ -63,5 +63,21 @@ public class InsightController {
         return ResponseEntity.ok(explanation);
     }
 
+    @GetMapping("/insights/active")
+    public List<Insight> getActive() {
+        return insightRepository.findByStatus(InsightStatus.ACTIVE);
+    }
+
+    @GetMapping("/insights/acknowledged")
+    public List<Insight> getAcknowledged() {
+        return insightRepository.findByStatus(InsightStatus.ACKNOWLEDGED);
+    }
+
+    @GetMapping("/insights/resolved")
+    public List<Insight> getResolved() {
+        return insightRepository.findByStatus(InsightStatus.RESOLVED);
+    }
+
+
 
 }

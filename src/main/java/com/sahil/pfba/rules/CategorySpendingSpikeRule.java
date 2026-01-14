@@ -20,6 +20,11 @@ public class CategorySpendingSpikeRule implements InsightRule {
     private final static BigDecimal SPIKE_THRESHOLD= new BigDecimal("0.40");
 
     @Override
+    public InsightType getType() {
+        return InsightType.CATEGORY_SPIKE;
+    }
+
+    @Override
     public boolean isApplicable(List<Expense> expenses) {
        return expenses!=null && expenses.size()>=3;
     }
@@ -63,6 +68,11 @@ public class CategorySpendingSpikeRule implements InsightRule {
             .message(message)
             .build();
         
+    }
+
+    @Override
+    public InsightSeverity initialSeverity() {
+        return InsightSeverity.LOW;
     }
 
     
