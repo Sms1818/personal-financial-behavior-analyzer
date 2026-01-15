@@ -4,14 +4,29 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "expenses")
 public class Expense {
-    private final String id;
-    private final String description;
-    private final BigDecimal amount;
-    private final Category category;
-    private final LocalDate date;
-    private final ExpenseStatus status;
-    private final int version;
+    @Id
+    private String id;
+    private String description;
+    private BigDecimal amount;
+    @Enumerated(EnumType.STRING)
+    private Category category;
+    private LocalDate date;
+    @Enumerated(EnumType.STRING)
+    private ExpenseStatus status;
+    private int version;
+
+    protected Expense() {
+        
+    }
 
     private Expense(Builder builder){
         this.id=builder.id;

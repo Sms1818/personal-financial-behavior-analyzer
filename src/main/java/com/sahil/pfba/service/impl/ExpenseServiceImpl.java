@@ -13,15 +13,15 @@ import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
 import com.sahil.pfba.exception.InvalidExpenseOperationException;
-import com.sahil.pfba.repository.ExpenseRepository;
+import com.sahil.pfba.repository.ExpenseJPARepository;
 import com.sahil.pfba.service.ExpenseService;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseJPARepository expenseRepository;
     private final SpendingAnalysisService spendingAnalysisService;
 
-    public ExpenseServiceImpl(ExpenseRepository expenseRepository,SpendingAnalysisService spendingAnalysisService) {
+    public ExpenseServiceImpl(ExpenseJPARepository expenseRepository,SpendingAnalysisService spendingAnalysisService) {
         this.expenseRepository = expenseRepository;
         this.spendingAnalysisService = spendingAnalysisService;
     }
@@ -43,8 +43,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<Expense> getExpensesByDateRange(LocalDate start, LocalDate end) {
-        return expenseRepository.findByDateRange(start, end);
+        return expenseRepository.findByDateBetween(start, end);
     }
+
 
     @Override
     public CompletableFuture<BigDecimal> analyzeTotalSpendingAsync(){
@@ -96,7 +97,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<Expense> getExpenseHistory(String id){
-        return expenseRepository.findHistoryById(id);
+        return List.of();
     }
 
     @Override
