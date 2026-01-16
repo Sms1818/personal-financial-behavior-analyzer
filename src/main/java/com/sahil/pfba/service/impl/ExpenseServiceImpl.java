@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sahil.pfba.analysis.SpendingAnalysisService;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
@@ -15,6 +16,8 @@ import com.sahil.pfba.domain.ExpenseStatus;
 import com.sahil.pfba.exception.InvalidExpenseOperationException;
 import com.sahil.pfba.repository.ExpenseJPARepository;
 import com.sahil.pfba.service.ExpenseService;
+
+
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -27,6 +30,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
+    @Transactional
     public Expense addExpense(Expense expense) {
         return expenseRepository.save(expense);
     }
@@ -55,6 +59,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
+    @Transactional
     public Expense updateExpense(String id, UpdateExpenseRequest request){
         Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
 
@@ -77,6 +82,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
+    @Transactional
     public void deleteExpense(String id){
         Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
         if(existing.getStatus()==ExpenseStatus.DELETED){

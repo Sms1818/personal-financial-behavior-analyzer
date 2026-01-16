@@ -23,32 +23,21 @@ import com.sahil.pfba.service.ExpenseService;
 public class CsvExpenseUploadService {
     private final ExpenseService expenseService;
     private final ImportAuditService auditService;
+    private final ExpenseImportProcessor importProcessor;
 
-    public CsvExpenseUploadService(ExpenseService expenseService, ImportAuditService auditService) {
+    public CsvExpenseUploadService(ExpenseService expenseService, ImportAuditService auditService, ExpenseImportProcessor importProcessor) {
         this.expenseService = expenseService;
         this.auditService = auditService;
+        this.importProcessor=importProcessor;
     }
 
     @Async("analysisExecutor")
     public void importAsync(MultipartFile file, ImportAudit audit){
-        System.out.println(
-            "CSV import running on thread: " + Thread.currentThread().getName()
-        );
-        try{
-            BulkUploadResult result = parse(file);
-            expenseService.saveAllExpenses(result.getValidExpenses());
-            auditService.completeAudit(
-                audit,
-                result.getTotalRecords(),
-                result.getValidExpenses().size(),
-                result.getErrors().size()
-            );
-    
-        } catch(Exception e){
-            auditService.failAudit(audit);
-            throw e;
-        }
+        BulkUploadResult result = parse(file);
+        importProcessor.process(result, audit);
     }
+
+    
 
     public BulkUploadResult parse(MultipartFile file){
         List<Expense> validExpenses=new ArrayList<>();

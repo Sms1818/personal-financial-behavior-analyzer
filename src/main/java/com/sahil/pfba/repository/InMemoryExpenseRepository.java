@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import com.sahil.pfba.domain.Category;
@@ -15,6 +16,7 @@ import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
 
 @Repository
+@Profile("test")
 public class InMemoryExpenseRepository implements ExpenseRepository {
     private final Map<String, List<Expense>> store=new ConcurrentHashMap<>();
 
