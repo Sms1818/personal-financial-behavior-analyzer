@@ -68,16 +68,15 @@ public class InsightController {
         return insightRepository.findByStatus(InsightStatus.ACTIVE);
     }
 
-    @GetMapping("/insights/acknowledged")
+    @GetMapping("acknowledged")
     public List<Insight> getAcknowledged() {
         return insightRepository.findByStatus(InsightStatus.ACKNOWLEDGED);
     }
 
-    @GetMapping("/insights/resolved")
+    @GetMapping("resolved")
     public List<Insight> getResolved() {
         return insightRepository.findByStatus(InsightStatus.RESOLVED);
     }
-
 
 
 }

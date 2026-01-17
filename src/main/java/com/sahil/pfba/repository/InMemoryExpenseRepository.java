@@ -16,7 +16,7 @@ import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
 
 @Repository
-@Profile("test")
+@Profile("dev")
 public class InMemoryExpenseRepository implements ExpenseRepository {
     private final Map<String, List<Expense>> store=new ConcurrentHashMap<>();
 

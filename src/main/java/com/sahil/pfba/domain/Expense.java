@@ -8,10 +8,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "expenses")
+@IdClass(ExpenseId.class)
 public class Expense {
     @Id
     private String id;
@@ -22,6 +24,7 @@ public class Expense {
     private LocalDate date;
     @Enumerated(EnumType.STRING)
     private ExpenseStatus status;
+    @Id
     private int version;
 
     protected Expense() {

@@ -2,15 +2,32 @@ package com.sahil.pfba.insights;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "insights")
 public class Insight {
-    private final String id;
-    private final InsightType type;
-    private final InsightSeverity severity;
-    private final InsightStatus status;
-    private final String message;
-    private final LocalDateTime createdAt;
-    private final String explanation;
-    private final LocalDateTime lastEvaluatedAt;
+    @Id
+    private String id;
+    @Enumerated(EnumType.STRING)
+    private InsightType type;
+    @Enumerated(EnumType.STRING)
+    private InsightSeverity severity;
+    @Enumerated(EnumType.STRING)
+    private InsightStatus status;
+    @Column(nullable = false)
+    private  String message;
+    private  LocalDateTime createdAt;
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
+    private LocalDateTime lastEvaluatedAt;
+
+    protected Insight() {} 
 
 
     private Insight(Builder builder){

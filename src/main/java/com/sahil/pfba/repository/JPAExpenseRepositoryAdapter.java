@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 
 @Repository
-@Primary
+@Profile("prod")
 public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
     private final ExpenseJPARepository expenseJPARepository;
 
@@ -26,7 +26,7 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
 
     @Override
     public Optional<Expense> findById(String id){
-        return expenseJPARepository.findById(id);
+        return expenseJPARepository.findLatestById(id);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
 
     @Override
     public List<Expense> findByCategory(Category category) {
-        return expenseJPARepository.findByCategory(category);
+        return expenseJPARepository.findLatestByCategory(category);
     }
 
     @Override
@@ -51,10 +51,7 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
 
     @Override
     public List<Expense> findHistoryById(String id) {
-        // versioning handled later (Flyway / history table)
-        return List.of();
+        return expenseJPARepository.findHistoryById(id);
     }
 
-
-    
 }
