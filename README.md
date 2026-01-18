@@ -126,7 +126,7 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 13:** Integrated PostgreSQL using Spring Data JPA, introduced clean repository abstractions to decouple domain logic from persistence, and successfully migrated expense storage from in-memory to database-backed implementation.
 - **Day 14:** Migrated from in-memory storage to PostgreSQL,reinforced async processing boundaries, and stabilized scheduled insight generation with proper lifecycle transitions
 - **Day 15:** Integrated PostgreSQL with clean environment-based switching (in-memory for dev, JPA for prod), resolved repository and profile clashes to stabilize the backend for long-term use, and successfully validated production startup. Bootstrapped a React + Vite frontend with a clean structure and completed the first end-to-end integration by fetching and rendering expenses from backend APIs.
-
+- **Day 16:** Implemented React-based frontend pages to display Expenses and Insights, integrating them with backend APIs (/api/expenses and /api/insights), setting up client-side routing using React Router for /expenses and /insights, and establishing a clean, scalable frontend structure with dedicated pages and service layers for API communication.
 
 
 
