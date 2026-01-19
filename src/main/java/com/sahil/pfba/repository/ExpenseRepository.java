@@ -10,9 +10,10 @@ import com.sahil.pfba.domain.Expense;
 public interface ExpenseRepository {
     Expense save(Expense expense);
     List<Expense> findAll();
-    Optional<Expense> findById(String id);
+    Optional<Expense> findLatestById(String id);
     List<Expense> findHistoryById(String id);
     List<Expense> findByCategory(Category category);
     List<Expense> findByDateRange(LocalDate start, LocalDate end);
     void saveAll(List<Expense> expenses);
+    
 }

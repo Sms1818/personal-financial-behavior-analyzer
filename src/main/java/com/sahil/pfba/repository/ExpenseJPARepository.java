@@ -17,53 +17,56 @@ import com.sahil.pfba.domain.ExpenseId;
     @Profile("prod")
     public interface  ExpenseJPARepository extends JpaRepository<Expense, ExpenseId> {
         @Query("""
-            select e from Expense e
-            where e.status = 'ACTIVE'
-            and e.version = (
-                select max(e2.version)
-                from Expense e2
-                where e2.id = e.id
-            )
-        """)
-        @Override
-        List<Expense> findAll();
+        select e from Expense e
+        where e.status = 'ACTIVE'
+        and e.version = (
+            select max(e2.version)
+            from Expense e2
+            where e2.id = e.id
+        )
+    """)
+    List<Expense> findAllLatest();
 
-        @Query("""
-            select e from Expense e
-            where e.category = :category
-            and e.status = 'ACTIVE'
-            and e.version = (
-                select max(e2.version)
-                from Expense e2
-                where e2.id = e.id
-            )
-        """)
-        List<Expense> findLatestByCategory(Category category);
+    @Query("""
+        select e from Expense e
+        where e.id = :id
+        and e.version = (
+            select max(e2.version)
+            from Expense e2
+            where e2.id = :id
+        )
+    """)
+    Optional<Expense> findLatestById(String id);
 
+    @Query("""
+        select e from Expense e
+        where e.id = :id
+        order by e.version asc
+    """)
+    List<Expense> findHistoryById(String id);
 
-        @Query("""
-            select e from Expense e
-            where e.date between :start and :end
-            and e.status = 'ACTIVE'
-        """)
-        List<Expense> findByDateBetween(LocalDate start, LocalDate end);
+    @Query("""
+        select e from Expense e
+        where e.category = :category
+        and e.status = 'ACTIVE'
+        and e.version = (
+            select max(e2.version)
+            from Expense e2
+            where e2.id = e.id
+        )
+    """)
+    List<Expense> findLatestByCategory(Category category);
 
-        @Query("""
-            select e from Expense e
-            where e.id = :id
-            order by e.version asc
-        """)
-        List<Expense> findHistoryById(String id);
-
-        @Query("""
-            select e from Expense e
-            where e.id = :id
-            and e.version = (
-                select max(e2.version)
-                from Expense e2
-                where e2.id = :id
-            )
-        """)
-        Optional<Expense> findLatestById(String id);
+    @Query("""
+        select e from Expense e
+        where e.date between :start and :end
+        and e.status = 'ACTIVE'
+        and e.version = (
+            select max(e2.version)
+            from Expense e2
+            where e2.id = e.id
+        )
+    """)
+    List<Expense> findByDateRange(LocalDate start, LocalDate end);
 
     }

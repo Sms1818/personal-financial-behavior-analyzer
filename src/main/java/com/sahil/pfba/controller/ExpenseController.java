@@ -54,7 +54,6 @@ public class ExpenseController {
             @Valid @RequestBody CreateExpenseRequest request) {
 
         Expense expense = new Expense.Builder()
-                .id(request.id)
                 .description(request.description)
                 .amount(request.amount)
                 .category(request.category)

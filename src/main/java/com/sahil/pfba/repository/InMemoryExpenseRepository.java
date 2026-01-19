@@ -27,7 +27,7 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
     }
 
     @Override
-    public Optional<Expense> findById(String id){
+    public Optional<Expense> findLatestById(String id){
         List<Expense> versions=store.get(id);
         if(versions==null || versions.isEmpty()){
             return Optional.empty();

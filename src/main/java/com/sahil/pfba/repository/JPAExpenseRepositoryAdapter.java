@@ -25,7 +25,7 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
     }
 
     @Override
-    public Optional<Expense> findById(String id){
+    public Optional<Expense> findLatestById(String id){
         return expenseJPARepository.findLatestById(id);
     }
 
@@ -41,7 +41,7 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
 
     @Override
     public List<Expense> findByDateRange(LocalDate start, LocalDate end) {
-        return expenseJPARepository.findByDateBetween(start, end);
+        return expenseJPARepository.findByDateRange(start, end);
     }
 
     @Override

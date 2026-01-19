@@ -3,6 +3,7 @@ package com.sahil.pfba.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -69,7 +70,7 @@ public class Expense {
     }
 
     public static class Builder {
-        private String id;
+        private String id = UUID.randomUUID().toString();
         private String description;
         private BigDecimal amount;
         private Category category;
@@ -113,7 +114,6 @@ public class Expense {
         }
 
         public Expense build() {
-            Objects.requireNonNull(id, "id must not be null");
             Objects.requireNonNull(amount, "amount must not be null");
             Objects.requireNonNull(category, "category must not be null");
             Objects.requireNonNull(date, "date must not be null");

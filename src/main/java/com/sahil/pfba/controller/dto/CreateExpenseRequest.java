@@ -10,8 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public class CreateExpenseRequest {
-    @NotBlank(message = "ID must not be blank")
-    public String id;
 
     @NotBlank(message = "Description must not be blank")
     public String description;

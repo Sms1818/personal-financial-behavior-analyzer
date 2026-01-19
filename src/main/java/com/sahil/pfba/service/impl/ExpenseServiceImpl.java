@@ -61,7 +61,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional
     public Expense updateExpense(String id, UpdateExpenseRequest request){
-        Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
+        Expense existing=expenseRepository.findLatestById(id).orElseThrow(()->new RuntimeException("Expense not found"));
 
         if(existing.getStatus()==ExpenseStatus.DELETED){
             throw new InvalidExpenseOperationException("Cannot update a deleted expense");
@@ -82,24 +82,27 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    @Transactional
-    public void deleteExpense(String id){
-        Expense existing=expenseRepository.findById(id).orElseThrow(()->new RuntimeException("Expense not found"));
-        if(existing.getStatus()==ExpenseStatus.DELETED){
-            return;
-        }
+@Transactional
+public void deleteExpense(String id) {
+    Expense existing = expenseRepository.findLatestById(id)
+        .orElseThrow(() -> new RuntimeException("Expense not found"));
 
-        Expense deleted=new Expense.Builder()
-            .id(existing.getId())
-            .description(existing.getDescription())
-            .amount(existing.getAmount())
-            .category(existing.getCategory())
-            .date(existing.getDate())
-            .status(ExpenseStatus.DELETED)
-            .build();
-        
-        expenseRepository.save(deleted);
+    if (existing.getStatus() == ExpenseStatus.DELETED) {
+        return;
     }
+
+    Expense deleted = new Expense.Builder()
+        .id(existing.getId())
+        .description(existing.getDescription())
+        .amount(existing.getAmount())
+        .category(existing.getCategory())
+        .date(existing.getDate())
+        .status(ExpenseStatus.DELETED)
+        .version(existing.getVersion() + 1)
+        .build();
+
+    expenseRepository.save(deleted);
+}
 
     @Override
     public List<Expense> getExpenseHistory(String id){
