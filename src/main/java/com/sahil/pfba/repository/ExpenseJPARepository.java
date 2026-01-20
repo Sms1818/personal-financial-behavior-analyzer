@@ -16,16 +16,18 @@ import com.sahil.pfba.domain.ExpenseId;
     @Repository
     @Profile("prod")
     public interface  ExpenseJPARepository extends JpaRepository<Expense, ExpenseId> {
+        @Override
         @Query("""
-        select e from Expense e
-        where e.status = 'ACTIVE'
-        and e.version = (
-            select max(e2.version)
-            from Expense e2
-            where e2.id = e.id
-        )
-    """)
-    List<Expense> findAllLatest();
+            select e from Expense e
+            where e.status = 'ACTIVE'
+            and e.version = (
+                select max(e2.version)
+                from Expense e2
+                where e2.id = e.id
+            )
+            order by e.date desc, e.version desc
+        """)
+        List<Expense> findAll();
 
     @Query("""
         select e from Expense e

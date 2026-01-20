@@ -130,6 +130,8 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 17:** The Expense Management frontend was extended beyond read-only views by adding an inline Add/Edit Expense modal within the Expense List page.
 The frontend was connected to backend create and update APIs with reusable form logic and automatic list refresh after successful actions.
 
+- **Day 18:** Added real-time summaries including total spend, top category, recent expense, and animated category-wise breakdown bars.Improved UX with inline add/edit/delete expense modal and automatic list refresh.
+
 
 
 

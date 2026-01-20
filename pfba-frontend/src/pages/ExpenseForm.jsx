@@ -6,7 +6,6 @@ import {
     updateExpense,
 } from "../services/expenseService";
 
-
 const CATEGORIES = [
   "FOOD",
   "TRANSPORTATION",
@@ -39,22 +38,8 @@ export default function AddExpense({ expense, onClose, onSuccess }) {
         category: expense.category,
         date: expense.date,
       });
-    } else {
-      setForm({
-        description: "",
-        amount: "",
-        category: "FOOD",
-        date: "",
-      });
     }
   }, [expense]);
-
-  function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -91,100 +76,62 @@ export default function AddExpense({ expense, onClose, onSuccess }) {
       await deleteExpense(expense.id);
       onSuccess();
       onClose();
-    } catch (err) {
-      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-xl p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-slate-900 border border-slate-800 w-full max-w-xl p-6 rounded-xl shadow-lg text-slate-100">
+        <h2 className="text-xl font-semibold mb-4">
           {isEditMode ? "Edit Expense" : "Add Expense"}
         </h2>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="text-red-400 mb-3">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={form.description}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
+          <input className="w-full bg-slate-800 border border-slate-700 p-2 rounded"
+            placeholder="Description" {...{ name: "description", value: form.description }}
+            onChange={e => setForm({ ...form, description: e.target.value })}
           />
 
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount"
+          <input className="w-full bg-slate-800 border border-slate-700 p-2 rounded"
+            type="number" placeholder="Amount"
             value={form.amount}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
+            onChange={e => setForm({ ...form, amount: e.target.value })}
           />
 
-          <select
-            name="category"
+          <select className="w-full bg-slate-800 border border-slate-700 p-2 rounded"
             value={form.category}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
+            onChange={e => setForm({ ...form, category: e.target.value })}
           >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
+            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
           </select>
 
-          <input
+          <input className="w-full bg-slate-800 border border-slate-700 p-2 rounded"
             type="date"
-            name="date"
             value={form.date}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
+            onChange={e => setForm({ ...form, date: e.target.value })}
           />
 
-          
           <div className="flex justify-between items-center pt-4">
             {isEditMode ? (
-              <button
-              type="button"
-              onClick={handleDelete}
-              disabled={loading}
-              title="Delete expense"
-              className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-md transition disabled:opacity-50"
-            >
-              <TrashIcon className="w-5 h-5" />
-            </button>
-            ) : (
-              <div />
-            )}
+              <button type="button" onClick={handleDelete}
+                className="text-red-400 hover:text-red-300">
+                <TrashIcon className="w-5 h-5" />
+              </button>
+            ) : <div />}
 
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 border rounded"
-              >
+              <button type="button" onClick={onClose}
+                className="border border-slate-700 px-4 py-2 rounded">
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-indigo-600 text-white px-5 py-2 rounded hover:bg-indigo-700"
-              >
-                {loading
-                  ? "Saving..."
-                  : isEditMode
-                  ? "Update"
-                  : "Add"}
+              <button type="submit"
+                className="bg-indigo-500 hover:bg-indigo-400 px-5 py-2 rounded text-white">
+                {loading ? "Saving..." : isEditMode ? "Update" : "Add"}
               </button>
             </div>
           </div>
