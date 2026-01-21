@@ -129,12 +129,8 @@ PFBA is developed incrementally with a strong focus on:
 - **Day 16:** Implemented React-based frontend pages to display Expenses and Insights, integrating them with backend APIs (/api/expenses and /api/insights), setting up client-side routing using React Router for /expenses and /insights, and establishing a clean, scalable frontend structure with dedicated pages and service layers for API communication.
 - **Day 17:** The Expense Management frontend was extended beyond read-only views by adding an inline Add/Edit Expense modal within the Expense List page.
 The frontend was connected to backend create and update APIs with reusable form logic and automatic list refresh after successful actions.
-
 - **Day 18:** Added real-time summaries including total spend, top category, recent expense, and animated category-wise breakdown bars.Improved UX with inline add/edit/delete expense modal and automatic list refresh.
-
-
-
-
+- **Day 19:** Enhanced the Expense page with advanced filtering, sorting, and search capabilities including date-range filters.Improved UI/UX with a dark-themed dashboard, sticky insights panel, category-wise breakdown, and smart spending insights.
 
 
 
