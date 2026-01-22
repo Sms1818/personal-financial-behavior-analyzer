@@ -1,5 +1,6 @@
 package com.sahil.pfba.insights;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public class JPAInsightRepositoryAdapter implements InsightRepository {
                     .status(status)
                     .message(existing.getMessage())
                     .explanation(existing.getExplanation())
-                    .lastEvaluatedAt(existing.getLastEvaluatedAt())
+                    .lastEvaluatedAt(LocalDateTime.now())
                     .build();
 
             jpaRepository.save(updated);

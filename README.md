@@ -131,6 +131,4 @@ PFBA is developed incrementally with a strong focus on:
 The frontend was connected to backend create and update APIs with reusable form logic and automatic list refresh after successful actions.
 - **Day 18:** Added real-time summaries including total spend, top category, recent expense, and animated category-wise breakdown bars.Improved UX with inline add/edit/delete expense modal and automatic list refresh.
 - **Day 19:** Enhanced the Expense page with advanced filtering, sorting, and search capabilities including date-range filters.Improved UI/UX with a dark-themed dashboard, sticky insights panel, category-wise breakdown, and smart spending insights.
-
-
-
+- **Day 20:** Implemented a dedicated Insights page with severity-based grouping, status filtering (Active, Acknowledged, Resolved, Dismissed), and overview statistics.
