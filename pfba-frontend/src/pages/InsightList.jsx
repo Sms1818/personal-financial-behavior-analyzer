@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import CategorySpendBarChart from "../charts/CategoryBarChart";
+import MonthlySpendLineChart from "../charts/MonthlySpendLineChart";
 import InsightActions from "../components/InsightActions";
+import { fetchExpenses } from "../services/expenseService";
 import { getAllInsights } from "../services/insightService";
+
 
 const severityStyles = {
   LOW: "bg-emerald-900/40 text-emerald-400 border-emerald-800",
@@ -10,6 +14,8 @@ const severityStyles = {
 export default function InsightList() {
   const [insights, setInsights] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [expenses, setExpenses] = useState([]);
+
 
   const loadInsights = () => {
     getAllInsights().then(setInsights);
@@ -17,6 +23,7 @@ export default function InsightList() {
 
   useEffect(() => {
     loadInsights();
+    fetchExpenses().then(setExpenses);
   }, []);
 
 
@@ -54,7 +61,31 @@ export default function InsightList() {
           <OverviewCard label="High Severity" value={stats.high} highlight />
           <OverviewCard label="Active Insights" value={stats.active} />
           <OverviewCard label="Acknowledged Insights" value={stats.acknowledged} />
+        </div>
 
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h3 className="text-lg font-semibold mb-3">
+            Category-wise Spending
+          </h3>
+
+          <p className="text-xs text-slate-400 mb-4">
+            Visual breakdown of where your money is going
+          </p>
+
+          <CategorySpendBarChart expenses={expenses} />
+
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h3 className="text-lg font-semibold mb-3">
+            Monthly Spending Trend
+          </h3>
+
+          <p className="text-xs text-slate-400 mb-4">
+            Track how your spending changes over time
+          </p>
+
+          <MonthlySpendLineChart expenses={expenses} />
         </div>
 
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">

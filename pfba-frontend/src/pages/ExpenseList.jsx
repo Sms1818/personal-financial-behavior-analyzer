@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CategoryPie from "../charts/CategoryPie";
+import TimeRangeSelector from "../components/TimeRangeSelector";
+import UploadCsvExpense from "../components/UploadCsvExpense";
 import { fetchExpenses } from "../services/expenseService";
+import { CATEGORY_COLORS } from "../utils/categoryColors";
 import AddExpense from "./ExpenseForm";
+
 
 export default function ExpenseList() {
     const [expenses, setExpenses] = useState([]);
@@ -12,10 +18,10 @@ export default function ExpenseList() {
     const [searchText, setSearchText] = useState("");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
+    const [range, setRange] = useState("30D");
+    const [showCSVUpload, setShowCSVUpload] = useState(false);
 
-
-
-
+    const navigate = useNavigate();
 
     const loadExpenses = () => {
         fetchExpenses().then(setExpenses);
@@ -107,23 +113,45 @@ export default function ExpenseList() {
         recentExpenseInsight,
     ].filter(Boolean);
 
+    const effectiveFromDate = (() => {
+        if (range === "CUSTOM") {
+            return fromDate ? new Date(fromDate) : null;
+        }
+        return getFromDateByRange(range);
+    })();
+
+    const effectiveToDate =
+        range === "CUSTOM" && toDate ? new Date(toDate) : null;
+
+
     const filteredAndSortedExpenses = expenses
-        .filter((e) => {
-            const matchesCategory = selectedCategory === "ALL" ? true : e.category === selectedCategory;
+        .filter(e => {
+            // 1️⃣ Category filter
+            if (selectedCategory !== "ALL" && e.category !== selectedCategory) {
+                return false;
+            }
 
-            const matchesSearch = e.description.toLowerCase().includes(searchText.toLowerCase());
+            // 2️⃣ Search filter
+            if (
+                searchText &&
+                !e.description.toLowerCase().includes(searchText.toLowerCase())
+            ) {
+                return false;
+            }
 
+            // 3️⃣ Date filter (range + custom)
             const expenseDate = new Date(e.date);
 
-            const matchesFromDate =
-                !fromDate || expenseDate >= new Date(fromDate);
+            if (effectiveFromDate && expenseDate < effectiveFromDate) {
+                return false;
+            }
 
-            const matchesToDate =
-                !toDate || expenseDate <= new Date(toDate);
+            if (effectiveToDate && expenseDate > effectiveToDate) {
+                return false;
+            }
 
-            return matchesCategory && matchesSearch && matchesFromDate && matchesToDate;
+            return true;
         })
-
         .sort((a, b) => {
             switch (sortBy) {
                 case "DATE_ASC":
@@ -138,6 +166,39 @@ export default function ExpenseList() {
                     return 0;
             }
         });
+
+    const pieData = (() => {
+        if (expenses.length === 0) return [];
+
+        const totals = expenses.reduce((acc, e) => {
+            acc[e.category] = (acc[e.category] || 0) + Number(e.amount);
+            return acc;
+        }, {});
+
+        const sorted = Object.entries(totals)
+            .map(([key, value]) => ({
+                id: key,
+                label: key,
+                value,
+            }))
+            .sort((a, b) => b.value - a.value);
+
+        const top = sorted.slice(0, 4);
+        const rest = sorted.slice(4);
+
+        if (rest.length > 0) {
+            const othersValue = rest.reduce((sum, i) => sum + i.value, 0);
+            top.push({
+                id: "Others",
+                label: "Others",
+                value: othersValue,
+            });
+        }
+
+        return top;
+    })();
+
+
 
 
 
@@ -166,7 +227,25 @@ export default function ExpenseList() {
                         >
                             + Add Expense
                         </button>
+                        <button
+                            onClick={() => {
+                                setShowCSVUpload(true);
+                                setSelectedExpense(null);
+                            }}
+                            className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm"
+                        >
+                            ⬆ Upload CSV
+                        </button>
                     </div>
+
+                    <TimeRangeSelector
+                        range={range}
+                        setRange={setRange}
+                        fromDate={fromDate}
+                        toDate={toDate}
+                        setFromDate={setFromDate}
+                        setToDate={setToDate}
+                    />
 
                     <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 mb-4">
 
@@ -187,6 +266,9 @@ export default function ExpenseList() {
                             <option value="EDUCATION">Education</option>
                             <option value="OTHER">Other</option>
                         </select>
+
+
+
 
                         {/* Sort */}
                         <select
@@ -211,51 +293,27 @@ export default function ExpenseList() {
                text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                         />
 
-                        {/* From Date */}
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                            <span>From</span>
-                            <input
-                                type="date"
-                                value={fromDate}
-                                onChange={(e) => setFromDate(e.target.value)}
-                                className="bg-slate-900 border border-slate-800 text-sm px-2 py-2 rounded-lg
-                 text-slate-300 focus:outline-none focus:border-indigo-500"
-                            />
-                        </div>
-
-                        {/* To Date */}
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                            <span>To</span>
-                            <input
-                                type="date"
-                                value={toDate}
-                                onChange={(e) => setToDate(e.target.value)}
-                                className="bg-slate-900 border border-slate-800 text-sm px-2 py-2 rounded-lg
-                 text-slate-300 focus:outline-none focus:border-indigo-500"
-                            />
-                        </div>
-
 
                     </div>
                     <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 mb-4">
                         <p className="text-xs text-slate-500 mb-2">
                             Showing {filteredAndSortedExpenses.length} of {expenses.length} expenses
                         </p>
-                
-                            <button
-                                onClick={() => {
-                                    setSelectedCategory("ALL");
-                                    setSearchText("");
-                                    setFromDate("");
-                                    setToDate("");
-                                    setSortBy("DATE_DESC");
-                                }}
-                                className="text-sm text-indigo-400 hover:text-indigo-300
+
+                        <button
+                            onClick={() => {
+                                setSelectedCategory("ALL");
+                                setSearchText("");
+                                setFromDate("");
+                                setToDate("");
+                                setSortBy("DATE_DESC");
+                            }}
+                            className="text-sm text-indigo-400 hover:text-indigo-300
                  underline underline-offset-4 whitespace-nowrap"
-                            >
-                                Reset
-                            </button>
-                        
+                        >
+                            Reset
+                        </button>
+
 
                     </div>
 
@@ -272,7 +330,13 @@ export default function ExpenseList() {
                                 <div className="flex justify-between">
                                     <div>
                                         <p className="font-medium">{exp.description}</p>
-                                        <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-slate-800 text-slate-300">
+                                        <span
+                                            className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full"
+                                            style={{
+                                                backgroundColor: `${CATEGORY_COLORS[exp.category] || "#64748B"}20`,
+                                                color: CATEGORY_COLORS[exp.category] || "#64748B",
+                                            }}
+                                        >
                                             {exp.category}
                                         </span>
                                         <p className="text-xs text-slate-500 mt-1 italic">
@@ -332,6 +396,15 @@ export default function ExpenseList() {
                         <div>
                             <p className="text-sm text-slate-400 mb-3">Spending Breakdown</p>
 
+                            <div className="border-t border-slate-800 pt-4">
+                                <p className="text-sm text-slate-400 mb-3">
+                                    Category Distribution
+                                </p>
+
+                                <CategoryPie data={pieData} />
+                            </div>
+
+
                             {categoryBreakdown.length === 0 ? (
                                 <p className="text-slate-500 text-sm">No data yet</p>
                             ) : (
@@ -350,12 +423,12 @@ export default function ExpenseList() {
                                             {/* Progress Bar */}
                                             <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-700
-                            ${item.percentage > 40
-                                                            ? "bg-rose-500"
-                                                            : "bg-indigo-500"
-                                                        }`}
-                                                    style={{ width: `${item.percentage}%` }}
+                                                    className={`h-full rounded-full transition-all duration-700`}
+                                                    style={{
+                                                        width: `${item.percentage}%`,
+                                                        backgroundColor: CATEGORY_COLORS[item.category] || "#64748B",
+                                                    }}
+
                                                 />
                                             </div>
                                         </div>
@@ -404,7 +477,7 @@ export default function ExpenseList() {
                             )}
                         </div>
 
-                        <button className="w-full bg-indigo-950 hover:bg-indigo-900 text-indigo-400 py-2 rounded-lg text-sm transition">
+                        <button onClick={() => navigate("/insights")} disabled={expenses.length < 3} className="w-full bg-indigo-950 hover:bg-indigo-900 text-indigo-400 py-2 rounded-lg text-sm transition">
                             Analyze Spending Patterns →
                         </button>
                     </div>
@@ -417,11 +490,43 @@ export default function ExpenseList() {
                         onClose={() => {
                             setShowAddExpense(false);
                             setSelectedExpense(null);
+
                         }}
                         onSuccess={loadExpenses}
                     />
                 )}
+                {showCSVUpload && (
+                    <UploadCsvExpense
+                        expense={selectedExpense}
+                        onClose={() => {
+                            setShowCSVUpload(false);
+                            setSelectedExpense(null);
+                        }}
+                        onSuccess={loadExpenses}
+                    />
+                )}
+
             </div>
         </div>
     );
 }
+
+function getFromDateByRange(range) {
+    const today = new Date();
+
+    switch (range) {
+        case "7D":
+            return new Date(today.setDate(today.getDate() - 7));
+        case "30D":
+            return new Date(today.setDate(today.getDate() - 30));
+        case "3M":
+            return new Date(today.setMonth(today.getMonth() - 3));
+        case "6M":
+            return new Date(today.setMonth(today.getMonth() - 6));
+        case "YTD":
+            return new Date(today.getFullYear(), 0, 1);
+        default:
+            return null;
+    }
+}
+

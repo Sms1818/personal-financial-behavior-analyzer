@@ -120,6 +120,6 @@ public class ExpenseController {
 
         return ResponseEntity
                 .accepted()
-                .body("Import started. Audit ID: " + audit.getId());
+                .body("Expenses Imported Sucessfully.");
     }
 }

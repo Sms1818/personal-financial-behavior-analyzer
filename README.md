@@ -132,3 +132,4 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 18:** Added real-time summaries including total spend, top category, recent expense, and animated category-wise breakdown bars.Improved UX with inline add/edit/delete expense modal and automatic list refresh.
 - **Day 19:** Enhanced the Expense page with advanced filtering, sorting, and search capabilities including date-range filters.Improved UI/UX with a dark-themed dashboard, sticky insights panel, category-wise breakdown, and smart spending insights.
 - **Day 20:** Implemented a dedicated Insights page with severity-based grouping, status filtering (Active, Acknowledged, Resolved, Dismissed), and overview statistics.
+- **Day 21:** Enhanced UI with interactive charts (line, bar, pie) for deeper expense insights.Improved expense and insight pages with better visual hierarchy and data clarity.Added CSV upload UI to support bulk expense imports alongside manual entry.
