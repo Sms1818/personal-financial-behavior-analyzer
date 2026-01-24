@@ -2,9 +2,11 @@ package com.sahil.pfba.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,18 +20,31 @@ import jakarta.persistence.Table;
 public class Expense {
     @Id
     private String id;
+
     private String description;
+
     private BigDecimal amount;
+
     @Enumerated(EnumType.STRING)
     private Category category;
+
     private LocalDate date;
+
     @Enumerated(EnumType.STRING)
     private ExpenseStatus status;
+
     @Id
     private int version;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private TransactionType transactionType;
+
+    
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     protected Expense() {
-        
     }
 
     private Expense(Builder builder){
@@ -40,6 +55,8 @@ public class Expense {
         this.date = builder.date;
         this.status=builder.status;
         this.version=builder.version;
+        this.transactionType=builder.transactionType;
+        this.createdAt = builder.createdAt;
     }
     
     public String getId(){
@@ -69,6 +86,13 @@ public class Expense {
         return version;
     }
 
+    public TransactionType getTransactionType(){
+        return transactionType;
+    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public static class Builder {
         private String id = UUID.randomUUID().toString();
         private String description;
@@ -77,6 +101,9 @@ public class Expense {
         private LocalDate date;
         private ExpenseStatus status= ExpenseStatus.ACTIVE;
         private int version=1;
+        private TransactionType transactionType=TransactionType.DEBIT;
+        private LocalDateTime createdAt = LocalDateTime.now();
+
 
         public Builder id(String id){
             this.id=id;
@@ -113,11 +140,22 @@ public class Expense {
             return this;
         }
 
+        public Builder transactionType(TransactionType transactionType){
+            this.transactionType=transactionType;
+            return this;
+        }
+        public Builder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+        
+
         public Expense build() {
             Objects.requireNonNull(amount, "amount must not be null");
             Objects.requireNonNull(category, "category must not be null");
             Objects.requireNonNull(date, "date must not be null");
             Objects.requireNonNull(status, "status must not be null");
+            Objects.requireNonNull(transactionType, "transactionType must not be null");
             if (version <= 0) {
                 throw new IllegalArgumentException("Version must be positive");
             }

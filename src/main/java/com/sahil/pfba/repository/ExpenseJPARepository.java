@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseId;
+import com.sahil.pfba.domain.TransactionType;
 
     @Repository
     @Profile("prod")
@@ -25,7 +26,7 @@ import com.sahil.pfba.domain.ExpenseId;
                 from Expense e2
                 where e2.id = e.id
             )
-            order by e.date desc, e.version desc
+            order by e.createdAt desc
         """)
         List<Expense> findAll();
 
@@ -70,5 +71,17 @@ import com.sahil.pfba.domain.ExpenseId;
         )
     """)
     List<Expense> findByDateRange(LocalDate start, LocalDate end);
+
+    @Query("""
+        select e from Expense e
+        where e.transactionType = :type
+        and e.status = 'ACTIVE'
+        and e.version = (
+            select max(e2.version)
+            from Expense e2
+            where e2.id = e.id
+        )
+    """)
+    List<Expense> findByType(TransactionType type);
 
     }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.sahil.pfba.domain.Category;
+import com.sahil.pfba.domain.TransactionType;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -22,5 +23,10 @@ public class UpdateExpenseRequest {
 
     @NotNull
     public LocalDate date;
+
+    @NotNull
+    public TransactionType transactionType;
+
+  
     
 }

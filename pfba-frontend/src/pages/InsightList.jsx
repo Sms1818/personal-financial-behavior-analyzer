@@ -5,7 +5,6 @@ import InsightActions from "../components/InsightActions";
 import { fetchExpenses } from "../services/expenseService";
 import { getAllInsights } from "../services/insightService";
 
-
 const severityStyles = {
   LOW: "bg-emerald-900/40 text-emerald-400 border-emerald-800",
   MEDIUM: "bg-amber-900/40 text-amber-400 border-amber-800",

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
+import com.sahil.pfba.domain.TransactionType;
 
 @Repository
 @Profile("dev")
@@ -74,6 +75,15 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
         for (Expense expense : expenses) {
             save(expense);
         }
+    }
+    @Override
+    public List<Expense> findByType(TransactionType type) {
+        return store.values()
+        .stream()
+        .map(list->list.get(list.size()-1))
+        .filter(e->e.getStatus()!=null && e.getStatus()==ExpenseStatus.ACTIVE)
+        .filter(e->e.getTransactionType().equals(type))
+        .collect(Collectors.toList());
     }
 
 }

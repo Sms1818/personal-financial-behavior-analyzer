@@ -1,9 +1,9 @@
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import {
-    createExpense,
-    deleteExpense,
-    updateExpense,
+  createExpense,
+  deleteExpense,
+  updateExpense,
 } from "../services/expenseService";
 
 const CATEGORIES = [
@@ -25,6 +25,7 @@ export default function AddExpense({ expense, onClose, onSuccess }) {
     amount: "",
     category: "FOOD",
     date: "",
+    transactionType: "DEBIT"
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,9 +35,10 @@ export default function AddExpense({ expense, onClose, onSuccess }) {
     if (expense) {
       setForm({
         description: expense.description,
-        amount: expense.amount,
+        amount: Math.abs(expense.amount),
         category: expense.category,
         date: expense.date,
+        transactionType: expense.transactionType || "DEBIT",
       });
     }
   }, [expense]);
@@ -107,6 +109,17 @@ export default function AddExpense({ expense, onClose, onSuccess }) {
             onChange={e => setForm({ ...form, category: e.target.value })}
           >
             {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+          </select>
+
+          <select
+            className="w-full bg-slate-800 border border-slate-700 p-2 rounded"
+            value={form.transactionType}
+            onChange={(e) =>
+              setForm({ ...form, transactionType: e.target.value })
+            }
+          >
+            <option value="DEBIT">Debit (Expense)</option>
+            <option value="CREDIT">Credit (Income)</option>
           </select>
 
           <input className="w-full bg-slate-800 border border-slate-700 p-2 rounded"

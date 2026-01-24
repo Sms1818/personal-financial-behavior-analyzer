@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.domain.TransactionType;
 
 public interface ExpenseService {
     Expense addExpense(Expense expense);
@@ -19,5 +20,6 @@ public interface ExpenseService {
     void deleteExpense(String id);
     List<Expense> getExpenseHistory(String id);
     void saveAllExpenses(List<Expense> expenses);
+    List<Expense> getExpensesByType(TransactionType type);
 
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.domain.TransactionType;
 
 @Repository
 @Profile("prod")
@@ -52,6 +53,11 @@ public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
     @Override
     public List<Expense> findHistoryById(String id) {
         return expenseJPARepository.findHistoryById(id);
+    }
+
+    @Override
+    public List<Expense> findByType(TransactionType type) {
+        return expenseJPARepository.findByType(type);
     }
 
 }

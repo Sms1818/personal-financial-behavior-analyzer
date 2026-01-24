@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.sahil.pfba.domain.Category;
+import com.sahil.pfba.domain.TransactionType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,5 +24,9 @@ public class CreateExpenseRequest {
 
     @NotNull(message = "Date must not be null")
     public LocalDate date;
-    
+
+    @NotNull(message = "Transaction type must not be null")
+    public TransactionType transactionType;
+
+
 }

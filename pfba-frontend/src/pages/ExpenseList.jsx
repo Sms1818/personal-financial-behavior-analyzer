@@ -21,6 +21,14 @@ export default function ExpenseList() {
     const [range, setRange] = useState("30D");
     const [showCSVUpload, setShowCSVUpload] = useState(false);
 
+    const debitExpenses = expenses.filter(
+        e => e.transactionType === "DEBIT"
+    )
+
+    const creditExpenses = expenses.filter(
+        e => e.transactionType === "CREDIT"
+    );
+
     const navigate = useNavigate();
 
     const loadExpenses = () => {
@@ -38,13 +46,24 @@ export default function ExpenseList() {
     }, [expenses]);
 
 
-    const totalSpend = expenses.reduce(
-        (sum, e) => sum + Number(e.amount), 0
+
+    const totalSpending = debitExpenses.reduce(
+        (sum, e) => sum + Math.abs(e.amount), 0
+    )
+
+    const totalIncome = creditExpenses.reduce(
+        (sum, e) => sum + e.amount,
+        0
     );
 
-    const categoryTotals = expenses.reduce((acc, e) => {
+    const netTotal =
+        totalIncome - totalSpending;
+
+
+
+    const categoryTotals = debitExpenses.reduce((acc, e) => {
         const category = e.category;
-        const amount = Number(e.amount);
+        const amount = Math.abs(e.amount);
 
         acc[category] = (acc[category] || 0) + amount;
         return acc;
@@ -58,7 +77,7 @@ export default function ExpenseList() {
 
     const mostRecentExpense = expenses.length
         ? [...expenses].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         )[0]
         : null;
 
@@ -66,7 +85,7 @@ export default function ExpenseList() {
         .map(([category, amount]) => ({
             category,
             amount,
-            percentage: ((amount / totalSpend) * 100).toFixed(0)
+            percentage: totalSpending ? ((amount / totalSpending) * 100).toFixed(0) : 0,
 
         }))
         .sort((a, b) => b.amount - a.amount);
@@ -79,20 +98,20 @@ export default function ExpenseList() {
 
     // High single expense insight (>= 30% of total)
     const highExpenseInsight = (() => {
-        if (!totalSpend) return null;
+        if (!totalSpending) return null;
 
-        const highExpense = expenses.find(
-            (e) => Number(e.amount) / totalSpend >= 0.3
+        const highExpense = debitExpenses.find(
+            (e) => Math.abs(e.amount) / totalSpending >= 0.3
         );
 
         return highExpense
-            ? `💸 Large expense: ₹${highExpense.amount} spent on ${highExpense.description}`
+            ? `💸 Large expense: ₹${Math.abs(highExpense.amount)} spent on ${highExpense.description}`
             : null;
     })();
 
     // Frequent small expenses insight
-    const smallExpensesCount = expenses.filter(
-        (e) => Number(e.amount) < 500
+    const smallExpensesCount = debitExpenses.filter(
+        (e) => Math.abs(e.amount) < 500
     ).length;
 
     const smallExpenseInsight =
@@ -168,10 +187,10 @@ export default function ExpenseList() {
         });
 
     const pieData = (() => {
-        if (expenses.length === 0) return [];
+        if (debitExpenses.length === 0) return [];
 
-        const totals = expenses.reduce((acc, e) => {
-            acc[e.category] = (acc[e.category] || 0) + Number(e.amount);
+        const totals = debitExpenses.reduce((acc, e) => {
+            acc[e.category] = (acc[e.category] || 0) + Math.abs(e.amount);
             return acc;
         }, {});
 
@@ -344,8 +363,14 @@ export default function ExpenseList() {
                                         </p>
                                     </div>
 
-                                    <p className="text-rose-400 font-semibold">
-                                        ₹{exp.amount}
+                                    <p
+                                        className={`font-semibold ${exp.transactionType === "CREDIT"
+                                            ? "text-emerald-400"
+                                            : "text-rose-400"
+                                            }`}
+                                    >
+                                        {exp.transactionType === "CREDIT" ? "+" : "-"} ₹
+                                        {Math.abs(exp.amount)}
                                     </p>
                                 </div>
                             </div>
@@ -369,11 +394,31 @@ export default function ExpenseList() {
                         </div>
 
                         <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
-                            <p>Total Spend</p>
-                            <p className="text-xl text-rose-400 font-semibold mt-1">
-                                - ₹{totalSpend}
+                            <p>Net Balance</p>
+                            <p
+                                className={`text-xl font-semibold mt-1 ${netTotal >= 0
+                                    ? "text-emerald-400"
+                                    : "text-rose-400"
+                                    }`}
+                            >
+                                ₹{netTotal}
                             </p>
                         </div>
+
+                        <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
+                            <p>Total Income</p>
+                            <p className="text-xl text-emerald-400 font-semibold mt-1">
+                                + ₹{totalIncome}
+                            </p>
+                        </div>
+
+                        <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
+                            <p>Total Spending</p>
+                            <p className="text-xl text-rose-400 font-semibold mt-1">
+                                - ₹{totalSpending}
+                            </p>
+                        </div>
+
 
 
                         <div>
@@ -446,7 +491,9 @@ export default function ExpenseList() {
                                         {mostRecentExpense.description}
                                     </p>
                                     <p className="text-rose-500 text-xs">
-                                        - ₹{mostRecentExpense.amount} · {mostRecentExpense.category}
+                                        {mostRecentExpense.transactionType === "CREDIT" ? "+" : "-"} ₹
+                                        {Math.abs(mostRecentExpense.amount)}  .  {mostRecentExpense.category}
+
                                     </p>
                                 </div>
                             ) : (

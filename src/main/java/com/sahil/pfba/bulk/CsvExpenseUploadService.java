@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import com.sahil.pfba.audit.ImportAuditService;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
+import com.sahil.pfba.domain.TransactionType;
 import com.sahil.pfba.service.ExpenseService;
 
 @Service
@@ -72,9 +74,12 @@ public class CsvExpenseUploadService {
 
         String[] tokens = line.split(",");
 
-        if (tokens.length != 5) {
+        if (tokens.length != 6) {
             throw new IllegalArgumentException("Invalid column count");
         }
+
+        TransactionType transactionType=TransactionType.valueOf(tokens[5].trim());
+
 
         BigDecimal amount;
         try {
@@ -87,13 +92,19 @@ public class CsvExpenseUploadService {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
+        if(transactionType==TransactionType.DEBIT){
+            amount=amount.negate();
+        }
+
         return new Expense.Builder()
                 .id(tokens[0].trim())
                 .description(tokens[1].trim())
                 .amount(amount)
                 .category(Category.valueOf(tokens[3].trim()))
                 .date(LocalDate.parse(tokens[4].trim()))
+                .transactionType(transactionType)
                 .status(ExpenseStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

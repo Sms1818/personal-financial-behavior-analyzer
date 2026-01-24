@@ -2,6 +2,7 @@ package com.sahil.pfba.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,6 +27,7 @@ import com.sahil.pfba.controller.dto.CreateExpenseRequest;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.domain.TransactionType;
 import com.sahil.pfba.service.ExpenseService;
 
 import jakarta.validation.Valid;
@@ -58,6 +60,8 @@ public class ExpenseController {
                 .amount(request.amount)
                 .category(request.category)
                 .date(request.date)
+                .transactionType(request.transactionType)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         return ResponseEntity
@@ -85,6 +89,14 @@ public class ExpenseController {
         return ResponseEntity.ok(
                 expenseService.getExpensesByDateRange(start, end));
     }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<Expense>> getExpensesByType(
+            @PathVariable TransactionType type) {
+
+        return ResponseEntity.ok(expenseService.getExpensesByType(type));
+    }
+    
 
     @PutMapping("/{id}")
     public ResponseEntity<Expense> updateExpense(
@@ -122,4 +134,5 @@ public class ExpenseController {
                 .accepted()
                 .body("Expenses Imported Sucessfully.");
     }
+
 }
