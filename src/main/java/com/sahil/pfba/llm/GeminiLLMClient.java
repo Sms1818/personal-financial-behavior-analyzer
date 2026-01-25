@@ -1,16 +1,21 @@
 package com.sahil.pfba.llm;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.sahil.pfba.insights.Insight;
+import com.sahil.pfba.insights.InsightExplanation;
+import com.sahil.pfba.insights.InsightType;
+import com.sahil.pfba.insights.signal.InsightSignal;
 
 @Component
 @Primary
+@Profile("prod")
 public class GeminiLLMClient implements LLMClient {
 
     private final WebClient webClient;
@@ -28,56 +33,27 @@ public class GeminiLLMClient implements LLMClient {
     }
 
     @Override
-    public String generateExplanation(Insight insight) {
-        String prompt = buildPrompt(insight);
+    public InsightExplanation generateInsightSummary(
+            InsightType type,
+            List<InsightSignal> signals
+    ) {
 
-        String requestBody = """
-            {
-              "contents": [
-                {
-                  "parts": [
-                    { "text": "%s" }
-                  ]
-                }
-              ]
-            }
-            """.formatted(prompt.replace("\"", "\\\""));
+        GeminiRequest request =
+                GeminiRequest.fromSignals(type, signals);
 
-        String response = webClient.post()
-                .uri("/v1beta/models/gemini-2.0-flash:generateContent")
-                .header("X-goog-api-key", apiKey)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        GeminiResponse response =
+                webClient.post()
+                        .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(request)
+                        .retrieve()
+                        .bodyToMono(GeminiResponse.class)
+                        .block();
 
-        return extractText(response);
-    }
+        if (response == null) {
+            throw new RuntimeException("Empty Gemini response");
+        }
 
-    private String buildPrompt(Insight insight) {
-        return """
-        You are a personal finance assistant.
-
-        Insight type: %s
-        Severity: %s
-        Message: %s
-
-        Explain this insight in clear, actionable language for a user.
-        """.formatted(
-                insight.getType(),
-                insight.getSeverity(),
-                insight.getMessage()
-        );
-    }
-
-    private String extractText(String rawResponse) {
-        // Simple extraction (good enough for now)
-        int idx = rawResponse.indexOf("\"text\"");
-        if (idx == -1) return null;
-
-        int start = rawResponse.indexOf(":", idx) + 1;
-        int end = rawResponse.indexOf("\"", start + 2);
-        return rawResponse.substring(start, end).replace("\"", "").trim();
+        return response.toExplanation();
     }
 }

@@ -1,27 +1,35 @@
 package com.sahil.pfba.llm;
 
+import java.util.List;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.sahil.pfba.insights.Insight;
+import com.sahil.pfba.insights.InsightExplanation;
+import com.sahil.pfba.insights.InsightType;
+import com.sahil.pfba.insights.signal.InsightSignal;
 
 @Component
+@Profile("dev")
 public class MockLLMClient implements LLMClient {
 
     @Override
-    public String generateExplanation(Insight insight) {
-
-        return switch (insight.getType()) {
-
-            case TOTAL_SPENDING ->
-                "Your overall spending is higher than usual. "
-              + "This may impact your long-term savings if it continues.";
-
-            case CATEGORY_SPIKE ->
-                "One of your spending categories has increased sharply. "
-              + "Consider reviewing discretionary expenses.";
-
-            default ->
-                "This insight highlights a notable financial pattern worth reviewing.";
-        };
+    public InsightExplanation generateInsightSummary(
+            InsightType type,
+            List<InsightSignal> signals
+    ) {
+        return new InsightExplanation(
+                "This is a mock AI-generated insight.",
+                List.of(
+                        "Detected " + signals.size() + " financial signals",
+                        "Pattern matches historical behavior"
+                ),
+                "Low to moderate financial impact",
+                List.of(
+                        "Monitor spending trends",
+                        "Review categories monthly"
+                ),
+                0.78
+        );
     }
 }

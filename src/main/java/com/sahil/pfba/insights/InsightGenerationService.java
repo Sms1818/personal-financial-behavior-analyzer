@@ -1,27 +1,23 @@
 package com.sahil.pfba.insights;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class InsightGenerationService {
-    private final InsightProcessor insightProcessor;
+
+    private final InsightProcessor processor;
 
     public InsightGenerationService(
-            InsightProcessor insightProcessor
+            InsightProcessor processor
     ) {
-        this.insightProcessor=insightProcessor;
+        this.processor = processor;
     }
 
-    @Async("analysisExecutor")
-    public void generateInsightsAsync() {
-
-        System.out.println(
-            "Insight generation running on thread: " +
-            Thread.currentThread().getName()
-        );
-
-        insightProcessor.generateInsightsTransactional();
+    @Transactional
+    public void generate() {
+        processor.generate();
     }
-
 }
+

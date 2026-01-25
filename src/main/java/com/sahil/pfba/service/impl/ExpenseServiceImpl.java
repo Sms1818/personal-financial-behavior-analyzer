@@ -1,15 +1,12 @@
 package com.sahil.pfba.service.impl;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sahil.pfba.analysis.SpendingAnalysisService;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
@@ -22,11 +19,10 @@ import com.sahil.pfba.service.ExpenseService;
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
     private final ExpenseRepository expenseRepository;
-    private final SpendingAnalysisService spendingAnalysisService;
-
-    public ExpenseServiceImpl(ExpenseRepository expenseRepository, SpendingAnalysisService spendingAnalysisService) {
+    
+    public ExpenseServiceImpl(ExpenseRepository expenseRepository) {
         this.expenseRepository = expenseRepository;
-        this.spendingAnalysisService = spendingAnalysisService;
+        
     }
 
     @Override
@@ -50,13 +46,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.findByDateRange(start, end);
     }
 
-    @Override
-    public CompletableFuture<BigDecimal> analyzeTotalSpendingAsync() {
-        // Analysis always runs on latest ACTIVE expense versions only
-        List<Expense> expenses = getAllExpenses();
-        return spendingAnalysisService.calculateTotalSpending(expenses);
-    }
-
+    
     @Override
     @Transactional
     public Expense updateExpense(String id, UpdateExpenseRequest request) {

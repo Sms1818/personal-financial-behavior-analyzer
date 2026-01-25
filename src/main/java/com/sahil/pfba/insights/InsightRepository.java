@@ -1,26 +1,14 @@
 package com.sahil.pfba.insights;
-
 import java.util.List;
-import java.util.Optional;
 
-public interface InsightRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-    Insight save(Insight insight);
-
-    Optional<Insight> findById(String id);
-
-    Optional<Insight> findByTypeAndMessage(
-            InsightType type,
-            String message
-    );
-
-    List<Insight> findAll();
-
-    List<Insight> findByType(InsightType type);
+@Repository
+public interface InsightRepository
+        extends JpaRepository<Insight, String> {
 
     List<Insight> findByStatus(InsightStatus status);
 
-    List<Insight> findActive();
-
-    void updateInsightStatus(String insightId, InsightStatus status);
+    List<Insight> findByType(InsightType type);
 }

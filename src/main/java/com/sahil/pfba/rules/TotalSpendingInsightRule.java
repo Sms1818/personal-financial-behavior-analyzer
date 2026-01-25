@@ -2,17 +2,17 @@ package com.sahil.pfba.rules;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.sahil.pfba.domain.Expense;
-import com.sahil.pfba.insights.Insight;
-import com.sahil.pfba.insights.InsightSeverity;
+import com.sahil.pfba.domain.TransactionType;
 import com.sahil.pfba.insights.InsightType;
+import com.sahil.pfba.insights.signal.InsightSignal;
 
 @Component
-public class TotalSpendingInsightRule implements InsightRule{
+public class TotalSpendingInsightRule implements InsightRule {
 
     @Override
     public InsightType getType() {
@@ -20,26 +20,41 @@ public class TotalSpendingInsightRule implements InsightRule{
     }
 
     @Override
-    public boolean isApplicable(List<Expense> expenses){
-        return expenses!=null && !expenses.isEmpty();
+    public boolean isApplicable(List<Expense> expenses) {
+        return expenses != null && !expenses.isEmpty();
     }
 
     @Override
-    public Insight generate(List<Expense> expenses){
-        BigDecimal totalSpending= expenses.stream()
-            .map(Expense::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        return new Insight.Builder()
-                .id(UUID.randomUUID().toString())
-                .type(InsightType.TOTAL_SPENDING)
-                .severity(InsightSeverity.LOW)
-                .message("Total spending accross all the expenses is "+totalSpending)
-                .build();
-    }
+    public List<InsightSignal> detectSignals(
+            List<Expense> expenses
+    ) {
 
-    @Override
-    public InsightSeverity initialSeverity() {
-        return InsightSeverity.LOW;
+        // ✅ only real spending
+        List<Expense> debits =
+                expenses.stream()
+                        .filter(e ->
+                                e.getTransactionType()
+                                        == TransactionType.DEBIT
+                        )
+                        .toList();
+
+        if (debits.isEmpty()) return List.of();
+
+        BigDecimal totalSpending =
+                debits.stream()
+                        .map(Expense::getAmount)
+                        .map(BigDecimal::abs)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return List.of(
+                new InsightSignal(
+                        InsightType.TOTAL_SPENDING,
+                        "TOTAL",
+                        Map.of(
+                                "totalSpending", totalSpending,
+                                "transactionCount", debits.size()
+                        )
+                )
+        );
     }
 }

@@ -1,175 +1,271 @@
 import { useEffect, useMemo, useState } from "react";
-import CategorySpendBarChart from "../charts/CategoryBarChart";
-import MonthlySpendLineChart from "../charts/MonthlySpendLineChart";
+import NetCashFlowChart from "../charts/NetCashFlowChart";
+import SavingsRateChart from "../charts/SavingsRateChart";
 import InsightActions from "../components/InsightActions";
 import { fetchExpenses } from "../services/expenseService";
 import { getAllInsights } from "../services/insightService";
 
+/* ---------------------------------- */
+
 const severityStyles = {
-  LOW: "bg-emerald-900/40 text-emerald-400 border-emerald-800",
-  MEDIUM: "bg-amber-900/40 text-amber-400 border-amber-800",
-  HIGH: "bg-rose-900/40 text-rose-400 border-rose-800",
+  LOW: {
+    label: "Low",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+  },
+  MEDIUM: {
+    label: "Medium",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+  },
+  HIGH: {
+    label: "High",
+    color: "text-rose-400",
+    bg: "bg-rose-500/10",
+  },
 };
+
+function safeParse(json) {
+  try {
+    if (!json) return null;
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+/* ---------------------------------- */
+
 export default function InsightList() {
   const [insights, setInsights] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("ALL");
   const [expenses, setExpenses] = useState([]);
-
-
-  const loadInsights = () => {
-    getAllInsights().then(setInsights);
-  };
+  const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
-    loadInsights();
+    getAllInsights().then(setInsights);
     fetchExpenses().then(setExpenses);
   }, []);
 
+  const activeInsights = useMemo(
+    () => insights.filter(i => i.status === "ACTIVE"),
+    [insights]
+  );
 
+  /* ---------- chart data ---------- */
 
-  const stats = useMemo(() => {
-    const total = insights.length;
-    const high = insights.filter(i => i.severity === "HIGH").length;
-    const active = insights.filter(i => i.status === "ACTIVE").length;
-    const acknowledged = insights.filter(i => i.status === "ACKNOWLEDGED").length;
-    return { total, high, active, acknowledged };
-  }, [insights]);
+  const netCashFlowData = [
+    {
+      id: "Net Cash Flow",
+      data: buildMonthlyCashFlow(expenses),
+    },
+  ];
 
-  const filteredInsights = useMemo(() => {
-    if (statusFilter === "ALL") return insights;
-    return insights.filter(i => i.status === statusFilter);
-  }, [insights, statusFilter]);
+  const savingsRateData = [
+    {
+      id: "Savings Rate",
+      data: buildMonthlySavingsRate(expenses),
+    },
+  ];
 
-  const groupInsights = useMemo(() => ({
-    HIGH: filteredInsights.filter(i => i.severity === "HIGH"),
-    MEDIUM: filteredInsights.filter(i => i.severity === "MEDIUM"),
-    LOW: filteredInsights.filter(i => i.severity === "LOW"),
-  }), [filteredInsights]);
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold">Insights</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Behavioral analysis derived from your spending patterns
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+
+        {/* HEADER */}
+        <header>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Insights
+          </h1>
+          <p className="text-slate-400 mt-1">
+            AI-powered understanding of your financial behavior
           </p>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <OverviewCard label="Total Insights" value={stats.total} />
-          <OverviewCard label="High Severity" value={stats.high} highlight />
-          <OverviewCard label="Active Insights" value={stats.active} />
-          <OverviewCard label="Acknowledged Insights" value={stats.acknowledged} />
-        </div>
+        {/* KPI STRIP */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Kpi label="Income" />
+          <Kpi label="Spending" />
+          <Kpi label="Savings" />
+          <Kpi label="Savings rate" />
+        </section>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h3 className="text-lg font-semibold mb-3">
-            Category-wise Spending
-          </h3>
+        {/* INSIGHTS */}
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold">
+            Active insights
+          </h2>
 
-          <p className="text-xs text-slate-400 mb-4">
-            Visual breakdown of where your money is going
-          </p>
+          {activeInsights.length === 0 && (
+            <p className="text-slate-500">
+              No active insights available.
+            </p>
+          )}
 
-          <CategorySpendBarChart expenses={expenses} />
+          {activeInsights.map(insight => {
+            const severity = severityStyles[insight.severity];
+            const explanation = safeParse(insight.explanation);
 
-        </div>
+            return (
+              <div
+                key={insight.id}
+                className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 hover:border-slate-700 transition"
+              >
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <span
+                      className={`inline-flex px-2 py-0.5 text-xs rounded-full ${severity.bg} ${severity.color}`}
+                    >
+                      {severity.label} severity
+                    </span>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h3 className="text-lg font-semibold mb-3">
-            Monthly Spending Trend
-          </h3>
+                    <h3 className="text-lg font-medium mt-2">
+                      {insight.message}
+                    </h3>
 
-          <p className="text-xs text-slate-400 mb-4">
-            Track how your spending changes over time
-          </p>
-
-          <MonthlySpendLineChart expenses={expenses} />
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <h3 className="font-semibold mb-2">Behavior Summary</h3>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            {stats.high > 0
-              ? "You have high severity spending patterns that need attention. Reducing dominant categories can significantly improve your financial health."
-              : "Your spending behavior looks stable. Continue monitoring expenses to maintain balance."}
-          </p>
-        </div>
-
-        <div className="flex gap-2 mb-6">
-          {["ALL", "ACTIVE", "ACKNOWLEDGED", "RESOLVED", "DISMISSED"].map(status => (
-            <button key={status} onClick={() => setStatusFilter(status)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition
-            ${statusFilter === status
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                }`}
-            >
-              {status}
-
-            </button>
-          ))}
-        </div>
-
-        {["HIGH", "MEDIUM", "LOW"].map(level => (
-          <div key={level} className="space-y-3">
-            <h3 className="font-semibold text-lg">
-              {level} Severity
-              <span className="ml-2 text-sm text-slate-400">
-                ({groupInsights[level].length})
-              </span>
-            </h3>
-
-            {groupInsights[level].length === 0 ? (
-              <p className="text-sm text-slate-500">
-                No {statusFilter !== "ALL" ? statusFilter.toLowerCase() : ""} insights
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {groupInsights[level].map(insight => (
-                  <div
-                    key={insight.id}
-                    className={`border rounded-lg p-4 ${severityStyles[level]}`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{insight.type}</p>
-                        <p className="text-sm text-slate-400 mt-1">
-                          {insight.message}
-                        </p>
-
-                        <InsightActions
-                          insight={insight}
-                          onAction={loadInsights}
-                        />
-                      </div>
-                      <span className="text-xs uppercase font-semibold">
-                        {insight.status}
-                      </span>
-
-                    </div>
+                    {explanation?.summary && (
+                      <p className="text-slate-400 text-sm mt-1">
+                        {explanation.summary}
+                      </p>
+                    )}
                   </div>
-                ))}
+
+                  <button
+                    onClick={() =>
+                      setExpanded(
+                        expanded === insight.id
+                          ? null
+                          : insight.id
+                      )
+                    }
+                    className="text-sm text-indigo-400 hover:text-indigo-300"
+                  >
+                    {expanded === insight.id ? "Hide" : "View"}
+                  </button>
+                </div>
+
+                {expanded === insight.id && explanation && (
+                  <div className="mt-5 border-t border-slate-800 pt-5 space-y-4">
+
+                    <DetailSection
+                      title="What caused this"
+                      items={explanation.drivers}
+                    />
+
+                    <DetailSection
+                      title="Recommendations"
+                      items={explanation.recommendations}
+                    />
+
+                    <InsightActions
+                      insight={insight}
+                      onAction={() =>
+                        getAllInsights().then(setInsights)
+                      }
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            );
+          })}
+        </section>
 
+        {/* CHARTS */}
+        <section className="grid md:grid-cols-2 gap-6 pt-6">
+          <ChartCard title="Net cash flow">
+            <NetCashFlowChart data={netCashFlowData} />
+          </ChartCard>
+
+          <ChartCard title="Savings rate">
+            <SavingsRateChart data={savingsRateData} />
+          </ChartCard>
+        </section>
       </div>
-
     </div>
-
-
   );
 }
 
-function OverviewCard({ label, value, highlight }) {
-  return (
-    <div className={`rounded-xl border p-4 ${highlight ? "bg-rose-900/30 border-rose-800"
-      : "bg-slate-900 border-slate-800"}`}>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-2xl font-semibold mt-1">{value}</p>
+/* ====================================================== */
+/* =================== COMPONENTS ======================= */
+/* ====================================================== */
 
+function Kpi({ label }) {
+  return (
+    <div className="rounded-xl bg-slate-900 border border-slate-800 p-4">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-xl font-semibold mt-1">—</p>
     </div>
-  )
+  );
+}
+
+function DetailSection({ title, items = [] }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-slate-400 mb-2">
+        {title}
+      </p>
+      <ul className="space-y-1 text-sm">
+        {items.map((item, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="text-indigo-400">•</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ChartCard({ title, children }) {
+  return (
+    <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5">
+      <h4 className="font-medium mb-3">{title}</h4>
+      {children}
+    </div>
+  );
+}
+
+/* ====================================================== */
+/* =================== HELPERS ========================== */
+/* ====================================================== */
+
+function buildMonthlyCashFlow(expenses) {
+  const monthly = {};
+  expenses.forEach(e => {
+    const m = e.date.slice(0, 7);
+    if (!monthly[m]) monthly[m] = { in: 0, out: 0 };
+
+    e.transactionType === "CREDIT"
+      ? (monthly[m].in += Number(e.amount))
+      : (monthly[m].out += Math.abs(e.amount));
+  });
+
+  return Object.entries(monthly)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([m, v]) => ({
+      x: m,
+      y: v.in - v.out,
+    }));
+}
+
+function buildMonthlySavingsRate(expenses) {
+  const monthly = {};
+
+  expenses.forEach(e => {
+    const m = e.date.slice(0, 7);
+    if (!monthly[m]) monthly[m] = { in: 0, out: 0 };
+
+    e.transactionType === "CREDIT"
+      ? (monthly[m].in += Number(e.amount))
+      : (monthly[m].out += Math.abs(e.amount));
+  });
+
+  return Object.entries(monthly)
+    .filter(([, v]) => v.in > 0)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([m, v]) => ({
+      x: m,
+      y: Number((((v.in - v.out) / v.in) * 100).toFixed(1)),
+    }));
 }

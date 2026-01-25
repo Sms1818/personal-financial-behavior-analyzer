@@ -1,27 +1,29 @@
 package com.sahil.pfba.insights;
-
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class InsightExplanationService {
+
     private final InsightRepository insightRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public InsightExplanationService(InsightRepository insightRepository) {
         this.insightRepository = insightRepository;
     }
 
-    public String getExplanation(String insightId) {
+    public InsightExplanation getStructuredExplanation(String insightId) {
         Insight insight = insightRepository.findById(insightId)
-                .orElseThrow(() -> new RuntimeException("Insight not found"));
+                .orElseThrow();
 
-        if (insight.getExplanation() == null) {
-            return "Explanation not available yet.";
+        try {
+            return objectMapper.readValue(
+                    insight.getExplanation(),
+                    InsightExplanation.class
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid explanation JSON", e);
         }
-
-        return insight.getExplanation();
     }
-
-    
 }
-    
-

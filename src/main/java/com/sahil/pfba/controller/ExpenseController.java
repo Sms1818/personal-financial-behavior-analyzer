@@ -1,10 +1,8 @@
 package com.sahil.pfba.controller;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -112,12 +110,6 @@ public class ExpenseController {
         return ResponseEntity.noContent().build();
     }
 
-
-    @GetMapping("/analyze/total")
-    public CompletableFuture<ResponseEntity<BigDecimal>> getTotalSpendingAsync() {
-        return expenseService.analyzeTotalSpendingAsync()
-                .thenApply(ResponseEntity::ok);
-    }
 
     @PostMapping("/import")
     public ResponseEntity<String> importExpenses(

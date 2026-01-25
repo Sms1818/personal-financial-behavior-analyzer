@@ -10,13 +10,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @EnableAsync
 public class AsyncConfig {
-    @Bean(name="analysisExecutor")
-    public Executor analysisExecutor(){
-        ThreadPoolTaskExecutor executor=new ThreadPoolTaskExecutor();
+
+    @Bean(name = "analysisExecutor")
+    public Executor analysisExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(4);
         executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("analysis-thread-");
+        executor.setThreadNamePrefix("insight-analysis-");
         executor.initialize();
         return executor;
     }
