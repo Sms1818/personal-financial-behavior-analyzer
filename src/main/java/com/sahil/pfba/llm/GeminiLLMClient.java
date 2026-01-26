@@ -33,15 +33,25 @@ public class GeminiLLMClient implements LLMClient {
     }
 
     @Override
-    public InsightExplanation generateInsightSummary(
-            InsightType type,
-            List<InsightSignal> signals
-    ) {
+public InsightExplanation generateInsightSummary(
+        InsightType type,
+        List<InsightSignal> signals
+) {
 
-        GeminiRequest request =
-                GeminiRequest.fromSignals(type, signals);
+    System.out.println("=== GEMINI CALL START ===");
+    System.out.println("Insight type = " + type);
+    System.out.println("Signals = " + signals.size());
 
-        GeminiResponse response =
+    GeminiRequest request =
+            GeminiRequest.fromSignals(type, signals);
+
+    System.out.println("Gemini request payload:");
+    System.out.println(request);
+
+    GeminiResponse response;
+
+    try {
+        response =
                 webClient.post()
                         .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -50,10 +60,33 @@ public class GeminiLLMClient implements LLMClient {
                         .bodyToMono(GeminiResponse.class)
                         .block();
 
-        if (response == null) {
-            throw new RuntimeException("Empty Gemini response");
-        }
+        System.out.println("Gemini raw response object:");
+        System.out.println(response);
 
-        return response.toExplanation();
+    } catch (Exception e) {
+        System.out.println("❌ GEMINI HTTP CALL FAILED");
+        e.printStackTrace();
+        throw e;
     }
+
+    if (response == null) {
+        System.out.println("❌ RESPONSE IS NULL");
+        throw new RuntimeException("Gemini response is null");
+    }
+
+    if (response.candidates() == null) {
+        System.out.println("❌ candidates IS NULL");
+        throw new RuntimeException("Gemini candidates null");
+    }
+
+    if (response.candidates().isEmpty()) {
+        System.out.println("❌ candidates EMPTY");
+        throw new RuntimeException("Gemini returned empty candidates");
+    }
+
+    System.out.println("=== GEMINI CALL SUCCESS ===");
+
+    return response.toExplanation();
+}
+
 }

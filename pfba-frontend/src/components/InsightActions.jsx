@@ -1,44 +1,82 @@
-import { updateInsightStatus } from "../services/insightService";
+import {
+  acknowledgeInsight,
+  dismissInsight,
+  resolveInsight,
+} from "../services/insightService";
 
-export default function InsightActions({insight, onAction}) {
-    async function handleAction(status){
-        console.log("Clicked action:", insight.id, status);
-        await updateInsightStatus(insight.id,status);
-        onAction();
+export default function InsightActions({ insight, onAction }) {
+  if (!insight) return null;
+
+  const { id, status } = insight;
+
+  const handle = async action => {
+    try {
+      await action(id);
+      onAction?.();
+    } catch (e) {
+      console.error(e);
+      alert("Action failed");
     }
+  };
 
+  return (
+    <div className="flex gap-3 pt-4">
 
-  if (insight.status === "ACTIVE") {
-    return (
-      <div className="flex gap-2 mt-3">
-        <button
-          onClick={() => handleAction("ACKNOWLEDGED")}
-          className="px-3 py-1 text-xs rounded bg-indigo-600 hover:bg-indigo-500"
-        >
-          Acknowledge
-        </button>
-        <button
-          onClick={() => handleAction("DISMISSED")}
-          className="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600"
-        >
-          Dismiss
-        </button>
-      </div>
-    );
-  }
+      {status === "ACTIVE" && (
+        <>
+          <button
+            onClick={() => handle(acknowledgeInsight)}
+            className="px-4 py-1.5 rounded-lg text-sm
+              bg-indigo-600/20 text-indigo-400
+              hover:bg-indigo-600/30 transition"
+          >
+            Acknowledge
+          </button>
 
-  if (insight.status === "ACKNOWLEDGED") {
-    return (
-      <div className="flex gap-2 mt-3">
-        <button
-          onClick={() => handleAction("RESOLVED")}
-          className="px-3 py-1 text-xs rounded bg-emerald-600 hover:bg-emerald-500"
-        >
-          Resolve
-        </button>
-      </div>
-    );
-  }
+          <button
+            onClick={() => handle(dismissInsight)}
+            className="px-4 py-1.5 rounded-lg text-sm
+              bg-rose-600/20 text-rose-400
+              hover:bg-rose-600/30 transition"
+          >
+            Dismiss
+          </button>
+        </>
+      )}
 
-  return null;
+      {status === "ACKNOWLEDGED" && (
+        <>
+          <button
+            onClick={() => handle(resolveInsight)}
+            className="px-4 py-1.5 rounded-lg text-sm
+              bg-emerald-600/20 text-emerald-400
+              hover:bg-emerald-600/30 transition"
+          >
+            Resolve
+          </button>
+
+          <button
+            onClick={() => handle(dismissInsight)}
+            className="px-4 py-1.5 rounded-lg text-sm
+              bg-rose-600/20 text-rose-400
+              hover:bg-rose-600/30 transition"
+          >
+            Dismiss
+          </button>
+        </>
+      )}
+
+      {status === "RESOLVED" && (
+        <span className="text-xs text-emerald-400 font-medium">
+          ✔ Resolved
+        </span>
+      )}
+
+      {status === "DISMISSED" && (
+        <span className="text-xs text-slate-400 font-medium">
+          ✕ Dismissed
+        </span>
+      )}
+    </div>
+  );
 }

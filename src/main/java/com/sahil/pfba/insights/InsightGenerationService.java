@@ -17,6 +17,7 @@ public class InsightGenerationService {
 
     @Transactional
     public void generate() {
+        System.out.println(">>> INSIGHT GENERATION REQUEST RECEIVED");
         processor.generate();
     }
 }

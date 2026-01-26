@@ -12,48 +12,53 @@ public record GeminiResponse(List<Candidate> candidates) {
     public InsightExplanation toExplanation() {
 
         try {
+            System.out.println("=== PARSING GEMINI RESPONSE ===");
+    
             String raw =
                     candidates.get(0)
                             .content()
                             .parts()
                             .get(0)
                             .text();
-
+    
+            System.out.println("RAW GEMINI TEXT:");
+            System.out.println(raw);
+    
             String json = extractJson(raw);
-
-            return mapper.readValue(
-                    json,
-                    InsightExplanation.class
-            );
-
+    
+            System.out.println("EXTRACTED JSON:");
+            System.out.println(json);
+    
+            InsightExplanation explanation =
+                    mapper.readValue(json, InsightExplanation.class);
+    
+            System.out.println("PARSED EXPLANATION OBJECT:");
+            System.out.println(mapper.writeValueAsString(explanation));
+    
+            return explanation;
+    
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Invalid Gemini JSON response",
-                    e
-            );
+    
+            System.out.println("❌ FAILED TO PARSE GEMINI RESPONSE");
+            e.printStackTrace();
+    
+            return InsightExplanation.fallback();
         }
     }
+    
 
-    /**
-     * Gemini often returns:
-     *
-     * ```json
-     * { ... }
-     * ```
-     *
-     * or text before JSON.
-     *
-     * This safely extracts only the JSON object.
-     */
     private String extractJson(String text) {
+
+        text = text
+                .replace("```json", "")
+                .replace("```", "")
+                .trim();
 
         int start = text.indexOf('{');
         int end = text.lastIndexOf('}');
 
         if (start == -1 || end == -1 || end <= start) {
-            throw new RuntimeException(
-                    "No valid JSON found in Gemini response:\n" + text
-            );
+            throw new RuntimeException("Invalid Gemini JSON");
         }
 
         return text.substring(start, end + 1);

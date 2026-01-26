@@ -14,12 +14,14 @@ public record GeminiRequest(List<Content> contents) {
     ) {
 
         String signalsJson =
-                signals.stream()
-                        .map(signal -> Map.of(
-                                "source", signal.getSource(),
-                                "evidence", signal.getEvidence()
-                        ))
-                        .toString();
+        signals.stream()
+                .map(signal -> Map.of(
+                        "source", signal.getSource(),
+                        "evidence", signal.getEvidence()
+                ))
+                .toList()
+                .toString();
+
 
         String prompt = """
 You are a personal finance intelligence system.

@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,6 +29,7 @@ public class Insight {
     @Column(nullable = false)
     private String message;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @Column(columnDefinition = "TEXT")
@@ -35,7 +37,8 @@ public class Insight {
 
     private LocalDateTime lastEvaluatedAt;
 
-    protected Insight() {}
+    protected Insight() {
+    }
 
     private Insight(Builder b) {
         this.id = b.id;
@@ -48,31 +51,44 @@ public class Insight {
         this.lastEvaluatedAt = b.lastEvaluatedAt;
     }
 
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
     public String getId() {
         return id;
     }
+
     public InsightType getType() {
         return type;
     }
+
     public InsightSeverity getSeverity() {
         return severity;
     }
+
     public InsightStatus getStatus() {
         return status;
     }
+
     public String getMessage() {
         return message;
     }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
     public String getExplanation() {
         return explanation;
     }
+
     public LocalDateTime getLastEvaluatedAt() {
         return lastEvaluatedAt;
     }
-    
 
     public static class Builder {
 
@@ -85,14 +101,45 @@ public class Insight {
         private String explanation;
         private LocalDateTime lastEvaluatedAt;
 
-        public Builder id(String id) { this.id = id; return this; }
-        public Builder type(InsightType type) { this.type = type; return this; }
-        public Builder severity(InsightSeverity severity) { this.severity = severity; return this; }
-        public Builder status(InsightStatus status) { this.status = status; return this; }
-        public Builder message(String message) { this.message = message; return this; }
-        public Builder explanation(String explanation) { this.explanation = explanation; return this; }
-        public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
-        public Builder lastEvaluatedAt(LocalDateTime lastEvaluatedAt) { this.lastEvaluatedAt = lastEvaluatedAt; return this; }
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder type(InsightType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder severity(InsightSeverity severity) {
+            this.severity = severity;
+            return this;
+        }
+
+        public Builder status(InsightStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public Builder explanation(String explanation) {
+            this.explanation = explanation;
+            return this;
+        }
+
+        public Builder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder lastEvaluatedAt(LocalDateTime lastEvaluatedAt) {
+            this.lastEvaluatedAt = lastEvaluatedAt;
+            return this;
+        }
 
         public Insight build() {
             return new Insight(this);

@@ -3,6 +3,7 @@ package com.sahil.pfba.insights;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -45,6 +46,8 @@ public class InsightAggregatorService {
                     " | signals = " + group.size()
             );
 
+            System.out.println("Calling LLM for insight type = " + type);
+
             InsightExplanation explanation;
 
             try {
@@ -54,6 +57,7 @@ public class InsightAggregatorService {
                                 group
                         );
             } catch (Exception e) {
+                System.out.println("❌ LLM FAILED COMPLETELY");
                 e.printStackTrace();
                 throw new RuntimeException(
                         "LLM failed for insight type " + type,
@@ -63,7 +67,7 @@ public class InsightAggregatorService {
 
             Insight insight =
                     new Insight.Builder()
-                            .id(type.name())   // ONE insight per type
+                            .id(UUID.randomUUID().toString())  
                             .type(type)
                             .severity(calculateSeverity(group))
                             .status(InsightStatus.ACTIVE)
