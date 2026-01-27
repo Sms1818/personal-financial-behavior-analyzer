@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.sahil.pfba.insights.InsightExplanation;
 import com.sahil.pfba.insights.InsightType;
+import com.sahil.pfba.insights.JsonUtil;
 import com.sahil.pfba.insights.signal.InsightSignal;
 
 @Component
@@ -24,8 +25,7 @@ public class GeminiLLMClient implements LLMClient {
     public GeminiLLMClient(
             WebClient.Builder webClientBuilder,
             @Value("${llm.gemini.api-key}") String apiKey,
-            @Value("${llm.gemini.api-url:https://generativelanguage.googleapis.com}") String baseUrl
-    ) {
+            @Value("${llm.gemini.api-url:https://generativelanguage.googleapis.com}") String baseUrl) {
         this.apiKey = apiKey;
         this.webClient = webClientBuilder
                 .baseUrl(baseUrl)
@@ -33,60 +33,104 @@ public class GeminiLLMClient implements LLMClient {
     }
 
     @Override
-public InsightExplanation generateInsightSummary(
-        InsightType type,
-        List<InsightSignal> signals
-) {
+    public InsightExplanation generateInsightSummary(
+            InsightType type,
+            List<InsightSignal> signals) {
 
-    System.out.println("=== GEMINI CALL START ===");
-    System.out.println("Insight type = " + type);
-    System.out.println("Signals = " + signals.size());
+        System.out.println("=== GEMINI CALL START ===");
+        System.out.println("Insight type = " + type);
+        System.out.println("Signals = " + signals.size());
 
-    GeminiRequest request =
-            GeminiRequest.fromSignals(type, signals);
+        GeminiRequest request = GeminiRequest.fromSignals(type, signals);
 
-    System.out.println("Gemini request payload:");
-    System.out.println(request);
+        System.out.println("Gemini request payload:");
+        System.out.println(request);
 
-    GeminiResponse response;
+        GeminiResponse response;
 
-    try {
-        response =
-                webClient.post()
-                        .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(request)
-                        .retrieve()
-                        .bodyToMono(GeminiResponse.class)
-                        .block();
+        try {
+            response = webClient.post()
+                    .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(GeminiResponse.class)
+                    .block();
 
-        System.out.println("Gemini raw response object:");
-        System.out.println(response);
+            System.out.println("Gemini raw response object:");
+            System.out.println(response);
 
-    } catch (Exception e) {
-        System.out.println("❌ GEMINI HTTP CALL FAILED");
-        e.printStackTrace();
-        throw e;
+        } catch (Exception e) {
+            System.out.println("❌ GEMINI HTTP CALL FAILED");
+            e.printStackTrace();
+            throw e;
+        }
+
+        if (response == null) {
+            System.out.println("❌ RESPONSE IS NULL");
+            throw new RuntimeException("Gemini response is null");
+        }
+
+        if (response.candidates() == null) {
+            System.out.println("❌ candidates IS NULL");
+            throw new RuntimeException("Gemini candidates null");
+        }
+
+        if (response.candidates().isEmpty()) {
+            System.out.println("❌ candidates EMPTY");
+            throw new RuntimeException("Gemini returned empty candidates");
+        }
+
+        System.out.println("=== GEMINI CALL SUCCESS ===");
+
+        return response.toExplanation();
     }
 
-    if (response == null) {
-        System.out.println("❌ RESPONSE IS NULL");
-        throw new RuntimeException("Gemini response is null");
+    @Override
+    public InsightExplanation generateInsightFromSummary(Object expenseSummary) {
+        String prompt = """
+                You are a personal finance intelligence system.
+
+                Analyze the user's spending data and identify the most important financial insight.
+
+                Return ONLY valid JSON.
+
+                Schema:
+                {
+                  "summary": "string",
+                  "drivers": ["string"],
+                  "impact": "string",
+                  "recommendations": ["string"],
+                  "confidence": number between 0 and 1
+                }
+
+                User expense summary:
+                %s
+                """.formatted(
+                JsonUtil.toJson(expenseSummary));
+
+        GeminiRequest request = new GeminiRequest(
+                List.of(
+                        new GeminiRequest.Content(
+                                List.of(
+                                        new GeminiRequest.Part(prompt)))));
+
+        GeminiResponse response = webClient.post()
+                .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(GeminiResponse.class)
+                .block();
+
+        if (response == null
+                || response.candidates() == null
+                || response.candidates().isEmpty()) {
+            return InsightExplanation.fallback();
+        }
+
+        return response.toExplanation();
+
     }
-
-    if (response.candidates() == null) {
-        System.out.println("❌ candidates IS NULL");
-        throw new RuntimeException("Gemini candidates null");
-    }
-
-    if (response.candidates().isEmpty()) {
-        System.out.println("❌ candidates EMPTY");
-        throw new RuntimeException("Gemini returned empty candidates");
-    }
-
-    System.out.println("=== GEMINI CALL SUCCESS ===");
-
-    return response.toExplanation();
-}
 
 }

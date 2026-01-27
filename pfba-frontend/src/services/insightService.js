@@ -60,3 +60,15 @@ export const resolveInsight = async id => {
     throw new Error("Failed to resolve insight");
   }
 };
+
+export const generateInsights = async () => {
+  const res=await fetch(
+    `${API_BASE_URL}/insights/generate`,
+    {
+      method: "POST"
+    }
+  );
+  if (!res.ok) {
+    throw new Error("Failed to generate insights");
+  }
+};

@@ -1,29 +1,37 @@
 package com.sahil.pfba.insights;
 
+import static com.sahil.pfba.insights.InsightType.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sahil.pfba.domain.Expense;
-import com.sahil.pfba.insights.signal.InsightSignal;
-import com.sahil.pfba.rules.InsightRule;
+import com.sahil.pfba.insights.summary.ExpenseSummary;
+import com.sahil.pfba.insights.summary.ExpenseSummaryBuilder;
+import com.sahil.pfba.llm.LLMClient;
 import com.sahil.pfba.service.ExpenseService;
 
 @Service
 public class InsightProcessor {
 
     private final ExpenseService expenseService;
-    private final List<InsightRule> rules;
-    private final InsightAggregatorService aggregator;
+    // private final List<InsightRule> rules;
+    // private final InsightAggregatorService aggregator;
+    private final InsightRepository insightRepository;
+    private final LLMClient llmClient;
 
     public InsightProcessor(
             ExpenseService expenseService,
-            List<InsightRule> rules,
-            InsightAggregatorService aggregator) {
+            LLMClient llmClient,
+            InsightRepository insightRepository
+    ) {
         this.expenseService = expenseService;
-        this.rules = rules;
-        this.aggregator = aggregator;
+        this.llmClient = llmClient;
+        this.insightRepository=insightRepository;
     }
 
     @Transactional
@@ -33,45 +41,49 @@ public class InsightProcessor {
 
         List<Expense> expenses = expenseService.getAllExpenses();
 
-        System.out.println("Expenses count = " + expenses.size());
-
         if (expenses.isEmpty()) {
             System.out.println("NO EXPENSES FOUND");
             return;
         }
 
-        System.out.println("Rules loaded = " + rules.size());
+        // // existing rule-based insights
+        // List<InsightSignal> signals = rules.stream()
+        //         .filter(r -> r.isApplicable(expenses))
+        //         .flatMap(r -> r.detectSignals(expenses).stream())
+        //         .toList();
 
-        List<InsightSignal> signals = rules.stream()
-                .filter(r -> {
-                    boolean applicable = r.isApplicable(expenses);
-                    System.out.println(
-                            "Rule " + r.getClass().getSimpleName()
-                                    + " applicable = " + applicable);
-                    return applicable;
-                })
-                .flatMap(r -> {
-                    List<InsightSignal> s = r.detectSignals(expenses);
-                    System.out.println(
-                            r.getClass().getSimpleName()
-                                    + " produced signals = "
-                                    + s.size());
-                    return s.stream();
-                })
-                .toList();
+        // if (!signals.isEmpty()) {
+        //     //aggregator.processSignals(signals);
+        // }
 
-        System.out.println("TOTAL SIGNALS = " + signals.size());
+        // ✅ new LLM-driven summary insight
+        ExpenseSummary summary =
+                ExpenseSummaryBuilder.build(expenses);
 
-        if (signals.isEmpty()) {
-            System.out.println("❌ NO SIGNALS GENERATED");
-            return;
-        }
+        InsightExplanation explanation =
+                llmClient.generateInsightFromSummary(summary);
 
-        System.out.println("CALLING AGGREGATOR");
+        
 
-        aggregator.processSignals(signals);
+        System.out.println("LLM GENERATED INSIGHT:");
+        System.out.println(JsonUtil.toJson(explanation));
 
         System.out.println("=== INSIGHT GENERATION FINISHED ===");
-    }
 
+        Insight insight =
+            new Insight.Builder()
+                    .id(UUID.randomUUID().toString())
+                    .type(TOTAL_SPENDING) // temporary
+                    .severity(InsightSeverity.LOW)
+                    .status(InsightStatus.ACTIVE)
+                    .message("AI-generated financial insight")
+                    .explanation(JsonUtil.toJson(explanation))
+                    .lastEvaluatedAt(LocalDateTime.now())
+                    .build();
+
+    insightRepository.save(insight);
+
+    System.out.println("✅ SAVED ONE AI INSIGHT");
+    }
 }
+

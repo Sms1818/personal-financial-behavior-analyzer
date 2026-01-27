@@ -12,4 +12,8 @@ public interface LLMClient {
             InsightType type,
             List<InsightSignal> signals
     );
+
+    InsightExplanation generateInsightFromSummary(
+        Object expenseSummary
+    );
 }

@@ -3,7 +3,7 @@ import NetCashFlowChart from "../charts/NetCashFlowChart";
 import SavingsRateChart from "../charts/SavingsRateChart";
 import InsightActions from "../components/InsightActions";
 import { fetchExpenses } from "../services/expenseService";
-import { getAllInsights } from "../services/insightService";
+import { generateInsights, getAllInsights } from "../services/insightService";
 
 /* ======================================================
    SEVERITY STYLES
@@ -32,7 +32,9 @@ export default function InsightList() {
   const [insights, setInsights] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ACTIVE");
+  const [loading, setLoading] = useState(false);
+
 
   /* ======================================================
      LOAD DATA
@@ -47,6 +49,19 @@ export default function InsightList() {
     refreshInsights();
     fetchExpenses().then(setExpenses);
   }, []);
+
+  const handleGenerateInsights = async () => {
+    try {
+      setLoading(true);
+      await generateInsights();
+      await refreshInsights();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate insights");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ======================================================
      KPIs
@@ -75,7 +90,6 @@ export default function InsightList() {
   ====================================================== */
 
   const visibleInsights = useMemo(() => {
-    if (statusFilter === "ALL") return insights;
     return insights.filter(i => i.status === statusFilter);
   }, [insights, statusFilter]);
 
@@ -109,6 +123,20 @@ export default function InsightList() {
           </p>
         </header>
 
+        <div className="flex gap-3">
+          <button
+            onClick={handleGenerateInsights}
+            disabled={loading}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition
+      ${loading
+                ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-500 text-white"
+              }`}
+          >
+            {loading ? "Analyzing expenses…" : "Generate Insights"}
+          </button>
+        </div>
+
         {/* KPI STRIP */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Kpi label="Income" value={kpis.income} tone="positive" />
@@ -134,16 +162,15 @@ export default function InsightList() {
 
         {/* FILTERS */}
         <section className="flex flex-wrap gap-2">
-          {["ALL", "ACTIVE", "ACKNOWLEDGED", "RESOLVED", "DISMISSED"].map(
+          {["ACTIVE", "ACKNOWLEDGED", "RESOLVED", "DISMISSED"].map(
             status => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-4 py-1.5 rounded-full text-sm transition
-                  ${
-                    statusFilter === status
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  ${statusFilter === status
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                   }`}
               >
                 {status}
@@ -263,8 +290,8 @@ function Kpi({ label, value, tone }) {
     tone === "positive"
       ? "text-emerald-400"
       : tone === "negative"
-      ? "text-rose-400"
-      : "text-slate-100";
+        ? "text-rose-400"
+        : "text-slate-100";
 
   return (
     <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4">
@@ -272,10 +299,10 @@ function Kpi({ label, value, tone }) {
       <p className={`text-xl font-semibold mt-1 ${color}`}>
         {typeof value === "number"
           ? value.toLocaleString("en-IN", {
-              style: "currency",
-              currency: "INR",
-              maximumFractionDigits: 0,
-            })
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+          })
           : value}
       </p>
     </div>
