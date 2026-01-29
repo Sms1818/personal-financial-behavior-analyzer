@@ -26,8 +26,8 @@ public class CategorySpendingSpikeRule implements InsightRule {
     }
 
     @Override
-    public boolean isApplicable(List<Expense> expenses) {
-        return expenses != null && expenses.size() >= 3;
+    public boolean isApplicable(List<Expense> debits) {
+        return debits != null && debits.size() >= 3;
     }
 
     @Override

@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sahil.pfba.insights.InsightExplanation;
 
+
 public record GeminiResponse(List<Candidate> candidates) {
 
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -45,6 +46,30 @@ public record GeminiResponse(List<Candidate> candidates) {
             return InsightExplanation.fallback();
         }
     }
+
+    public MultiInsightResponse toMultiInsightResponse() {
+
+        try {
+            String raw =
+                    candidates.get(0)
+                            .content()
+                            .parts()
+                            .get(0)
+                            .text();
+    
+            String json = extractJson(raw);
+    
+            return mapper.readValue(
+                    json,
+                    MultiInsightResponse.class
+            );
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new MultiInsightResponse();
+        }
+    }
+    
     
 
     private String extractJson(String text) {

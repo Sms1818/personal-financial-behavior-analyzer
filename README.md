@@ -137,3 +137,4 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 23:** Added interactive financial graphs including Net Cash Flow and Savings Rate to visualize spending behavior over time.LLM-powered explanations and recommendations are currently in progress and will be completed next.
 - **Day 24:** Fixed Gemini LLM integration by aligning request/response schema and improving JSON parsing stability.
 - **Day 25:** Removed rule-based insight engine and fully transitioned to LLM-driven insight generation.Implemented expense summary–based AI insight creation with clean backend flow.
+- **Day 26:** Migrated from single insight to multi-insight AI generation.Added AI-driven severity classification and resolved enum parsing failures.

@@ -1,19 +1,17 @@
 package com.sahil.pfba.llm;
 
-import java.util.List;
-
-import com.sahil.pfba.insights.InsightExplanation;
-import com.sahil.pfba.insights.InsightType;
-import com.sahil.pfba.insights.signal.InsightSignal;
+import com.sahil.pfba.insights.summary.ExpenseSummary;
 
 public interface LLMClient {
 
-    InsightExplanation generateInsightSummary(
-            InsightType type,
-            List<InsightSignal> signals
-    );
+    // InsightExplanation generateInsightSummary(
+    //         InsightType type,
+    //         List<InsightSignal> signals
+    // );
 
-    InsightExplanation generateInsightFromSummary(
-        Object expenseSummary
-    );
+    // InsightExplanation generateInsightFromSummary(
+    //     Object expenseSummary
+    // );
+
+    MultiInsightResponse generateInsightFromSummary(ExpenseSummary summary);
 }

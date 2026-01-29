@@ -1,7 +1,5 @@
 package com.sahil.pfba.llm;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -9,10 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.sahil.pfba.insights.InsightExplanation;
-import com.sahil.pfba.insights.InsightType;
-import com.sahil.pfba.insights.JsonUtil;
-import com.sahil.pfba.insights.signal.InsightSignal;
+import com.sahil.pfba.insights.summary.ExpenseSummary;
 
 @Component
 @Primary
@@ -33,88 +28,15 @@ public class GeminiLLMClient implements LLMClient {
     }
 
     @Override
-    public InsightExplanation generateInsightSummary(
-            InsightType type,
-            List<InsightSignal> signals) {
-
-        System.out.println("=== GEMINI CALL START ===");
-        System.out.println("Insight type = " + type);
-        System.out.println("Signals = " + signals.size());
-
-        GeminiRequest request = GeminiRequest.fromSignals(type, signals);
-
-        System.out.println("Gemini request payload:");
-        System.out.println(request);
-
-        GeminiResponse response;
-
-        try {
-            response = webClient.post()
-                    .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(GeminiResponse.class)
-                    .block();
-
-            System.out.println("Gemini raw response object:");
-            System.out.println(response);
-
-        } catch (Exception e) {
-            System.out.println("❌ GEMINI HTTP CALL FAILED");
-            e.printStackTrace();
-            throw e;
-        }
-
-        if (response == null) {
-            System.out.println("❌ RESPONSE IS NULL");
-            throw new RuntimeException("Gemini response is null");
-        }
-
-        if (response.candidates() == null) {
-            System.out.println("❌ candidates IS NULL");
-            throw new RuntimeException("Gemini candidates null");
-        }
-
-        if (response.candidates().isEmpty()) {
-            System.out.println("❌ candidates EMPTY");
-            throw new RuntimeException("Gemini returned empty candidates");
-        }
-
-        System.out.println("=== GEMINI CALL SUCCESS ===");
-
-        return response.toExplanation();
-    }
-
-    @Override
-    public InsightExplanation generateInsightFromSummary(Object expenseSummary) {
-        String prompt = """
-                You are a personal finance intelligence system.
-
-                Analyze the user's spending data and identify the most important financial insight.
-
-                Return ONLY valid JSON.
-
-                Schema:
-                {
-                  "summary": "string",
-                  "drivers": ["string"],
-                  "impact": "string",
-                  "recommendations": ["string"],
-                  "confidence": number between 0 and 1
-                }
-
-                User expense summary:
-                %s
-                """.formatted(
-                JsonUtil.toJson(expenseSummary));
-
-        GeminiRequest request = new GeminiRequest(
-                List.of(
-                        new GeminiRequest.Content(
-                                List.of(
-                                        new GeminiRequest.Part(prompt)))));
-
+    public MultiInsightResponse generateInsightFromSummary(
+            ExpenseSummary summary
+    ) {
+    
+        System.out.println("=== GEMINI MULTI-INSIGHT CALL START ===");
+    
+        GeminiRequest request =
+                GeminiRequest.fromExpenseSummary(summary);
+    
         GeminiResponse response = webClient.post()
                 .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,15 +44,13 @@ public class GeminiLLMClient implements LLMClient {
                 .retrieve()
                 .bodyToMono(GeminiResponse.class)
                 .block();
-
-        if (response == null
-                || response.candidates() == null
-                || response.candidates().isEmpty()) {
-            return InsightExplanation.fallback();
+    
+        if (response == null) {
+            return new MultiInsightResponse();
         }
-
-        return response.toExplanation();
-
+    
+        return response.toMultiInsightResponse();
     }
+    
 
 }

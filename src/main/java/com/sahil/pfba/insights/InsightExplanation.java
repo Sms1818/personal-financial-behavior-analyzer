@@ -11,6 +11,7 @@ public class InsightExplanation {
         private String impact;
         private List<String> recommendations;
         private double confidence;
+        private InsightSeverity severity;
     
         public InsightExplanation() {
         }
@@ -20,13 +21,15 @@ public class InsightExplanation {
                 List<String> drivers,
                 String impact,
                 List<String> recommendations,
-                double confidence
+                double confidence,
+                InsightSeverity severity
         ) {
             this.summary = summary;
             this.drivers = drivers;
             this.impact = impact;
             this.recommendations = recommendations;
             this.confidence = confidence;
+            this.severity = severity;
         }
 
         public static InsightExplanation fallback() {
@@ -42,7 +45,8 @@ public class InsightExplanation {
                                 "Add more categorized expenses.",
                                 "Track expenses consistently."
                         ),
-                        0.6
+                        0.6,
+                        InsightSeverity.MEDIUM
                 );
             }
     
@@ -64,6 +68,9 @@ public class InsightExplanation {
     
         public double getConfidence() {
             return confidence;
+        }
+        public InsightSeverity getSeverity() {
+            return severity;
         }
     }
 
