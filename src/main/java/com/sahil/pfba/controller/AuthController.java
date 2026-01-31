@@ -1,12 +1,15 @@
 package com.sahil.pfba.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sahil.pfba.controller.dto.AuthResponse;
+import com.sahil.pfba.controller.dto.LoginRequest;
 import com.sahil.pfba.controller.dto.RegisterRequest;
 import com.sahil.pfba.controller.dto.RegisterResponse;
 import com.sahil.pfba.service.AuthService;
@@ -29,5 +32,13 @@ public class AuthController {
     ) {
         return authService.register(request);
         
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+        @RequestBody @Valid LoginRequest request
+    ) {
+        String token=authService.login(request);
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }

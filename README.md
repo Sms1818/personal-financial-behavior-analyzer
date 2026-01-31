@@ -139,3 +139,4 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 25:** Removed rule-based insight engine and fully transitioned to LLM-driven insight generation.Implemented expense summary–based AI insight creation with clean backend flow.
 - **Day 26:** Migrated from single insight to multi-insight AI generation.Added AI-driven severity classification and resolved enum parsing failures.
 - **Day 27:** Implemented core authentication foundation using Spring Security.Added User entity, repository, password hashing (BCrypt), and public auth route for registration of user.
+- **Day 28:** Implemented JWT-based authentication for secure token generation. Added backend login flow with password validation and role-based claims. Integrated authentication service layer using Spring Security and BCrypt.

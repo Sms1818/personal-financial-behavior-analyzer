@@ -31,3 +31,7 @@ llm:
   gemini:
     api-key: ${GEMINI_API_KEY}
 
+jwt:
+    secret: pfba-super-secure-jwt-signing-key-2026-prod-secret
+    expiration-ms: 3600000
+

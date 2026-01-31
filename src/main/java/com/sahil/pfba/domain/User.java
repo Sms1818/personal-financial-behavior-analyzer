@@ -20,7 +20,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String pasword;
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,7 +38,7 @@ public class User {
     ){
         this.id = UUID.randomUUID().toString();
         this.email = email;
-        this.pasword = password;
+        this.password = password;
         this.role = role;
         this.createdAt = LocalDateTime.now();
     }
@@ -49,8 +49,8 @@ public class User {
     public String getEmail() {
         return email;
     }
-    public String getPasword() {
-        return pasword;
+    public String getPassword() {
+        return password;
     }
     public Role getRole() {
         return role;

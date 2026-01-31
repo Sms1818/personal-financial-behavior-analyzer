@@ -1,8 +1,8 @@
 package com.sahil.pfba.controller.dto;
 
 public class RegisterResponse {
-    private String id;
-    private String email;
+    private final String id;
+    private final String email;
 
     public RegisterResponse(String id, String email) {
         this.id = id;
