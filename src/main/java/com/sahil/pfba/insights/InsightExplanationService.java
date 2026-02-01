@@ -1,4 +1,5 @@
 package com.sahil.pfba.insights;
+
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,13 +10,22 @@ public class InsightExplanationService {
     private final InsightRepository insightRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public InsightExplanationService(InsightRepository insightRepository) {
+    public InsightExplanationService(
+            InsightRepository insightRepository
+    ) {
         this.insightRepository = insightRepository;
     }
 
-    public InsightExplanation getStructuredExplanation(String insightId) {
-        Insight insight = insightRepository.findById(insightId)
-                .orElseThrow();
+    public InsightExplanation getStructuredExplanation(
+            String insightId,
+            String userId
+    ) {
+        Insight insight =
+                insightRepository
+                        .findByIdAndUserId(insightId, userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Insight not found")
+                        );
 
         try {
             return objectMapper.readValue(

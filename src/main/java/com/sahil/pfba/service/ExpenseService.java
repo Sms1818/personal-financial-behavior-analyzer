@@ -9,14 +9,42 @@ import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.TransactionType;
 
 public interface ExpenseService {
-    Expense addExpense(Expense expense);
-    List<Expense> getAllExpenses();
-    List<Expense> getExpensesByCategory(Category category);
-    List<Expense> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
-    Expense updateExpense(String id, UpdateExpenseRequest expense);
-    void deleteExpense(String id);
-    List<Expense> getExpenseHistory(String id);
-    void saveAllExpenses(List<Expense> expenses);
-    List<Expense> getExpensesByType(TransactionType type);
+
+    Expense addExpense(String userId, Expense expense);
+
+    List<Expense> getAllExpenses(String userId);
+
+    List<Expense> getExpensesByCategory(
+            String userId,
+            Category category
+    );
+
+    List<Expense> getExpensesByDateRange(
+            String userId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+    Expense updateExpense(
+            String userId,
+            String expenseId,
+            UpdateExpenseRequest expense
+    );
+
+    void deleteExpense(String userId, String expenseId);
+
+    List<Expense> getExpenseHistory(
+            String userId,
+            String expenseId
+    );
+
+    List<Expense> getExpensesByType(
+            String userId,
+            TransactionType type
+    );
+
+    
+
+
 
 }

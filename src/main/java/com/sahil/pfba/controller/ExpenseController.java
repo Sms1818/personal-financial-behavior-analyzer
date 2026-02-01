@@ -3,9 +3,12 @@ package com.sahil.pfba.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,13 +28,16 @@ import com.sahil.pfba.controller.dto.CreateExpenseRequest;
 import com.sahil.pfba.controller.dto.UpdateExpenseRequest;
 import com.sahil.pfba.domain.Category;
 import com.sahil.pfba.domain.Expense;
+import com.sahil.pfba.domain.ExpenseStatus;
 import com.sahil.pfba.domain.TransactionType;
+import com.sahil.pfba.domain.User;
 import com.sahil.pfba.service.ExpenseService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/expenses")
+@PreAuthorize("hasRole('USER')")
 public class ExpenseController {
 
     private final ExpenseService expenseService;
@@ -48,83 +54,125 @@ public class ExpenseController {
         this.auditService = auditService;
     }
 
+    // =====================================================
+    // CREATE
+    // =====================================================
 
     @PostMapping
     public ResponseEntity<Expense> addExpense(
-            @Valid @RequestBody CreateExpenseRequest request) {
+            @Valid @RequestBody CreateExpenseRequest request,
+            Authentication authentication) {
+
+        String userId = authentication.getPrincipal().toString();
 
         Expense expense = new Expense.Builder()
+                .id(UUID.randomUUID().toString())
+                .user(new User(userId)) 
                 .description(request.description)
                 .amount(request.amount)
                 .category(request.category)
                 .date(request.date)
                 .transactionType(request.transactionType)
+                .version(1)
+                .status(ExpenseStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        expense = expenseService.addExpense(userId, expense);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(expenseService.addExpense(expense));
+                .body(expense);
     }
 
+    // =====================================================
+    // READ
+    // =====================================================
+
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        return ResponseEntity.ok(expenseService.getAllExpenses());
+    public List<Expense> getAllExpenses(
+            Authentication authentication) {
+
+        String userId = authentication.getPrincipal().toString();
+        return expenseService.getAllExpenses(userId);
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Expense>> getExpensesByCategory(
+    public List<Expense> getExpensesByCategory(
+            Authentication authentication,
             @PathVariable Category category) {
 
-        return ResponseEntity.ok(expenseService.getExpensesByCategory(category));
+        String userId = authentication.getPrincipal().toString();
+        return expenseService.getExpensesByCategory(userId, category);
     }
 
     @GetMapping("/range")
-    public ResponseEntity<List<Expense>> getExpensesByDateRange(
+    public List<Expense> getExpensesByDateRange(
+            Authentication authentication,
             @RequestParam LocalDate start,
             @RequestParam LocalDate end) {
 
-        return ResponseEntity.ok(
-                expenseService.getExpensesByDateRange(start, end));
+        String userId = authentication.getPrincipal().toString();
+        return expenseService.getExpensesByDateRange(userId, start, end);
     }
 
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<Expense>> getExpensesByType(
+    public List<Expense> getExpensesByType(
+            Authentication authentication,
             @PathVariable TransactionType type) {
 
-        return ResponseEntity.ok(expenseService.getExpensesByType(type));
+        String userId = authentication.getPrincipal().toString();
+        return expenseService.getExpensesByType(userId, type);
     }
-    
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(
+    public Expense updateExpense(
+            Authentication authentication,
             @PathVariable String id,
             @Valid @RequestBody UpdateExpenseRequest request) {
 
-        return ResponseEntity.ok(expenseService.updateExpense(id, request));
+        String userId = authentication.getPrincipal().toString();
+        return expenseService.updateExpense(userId, id, request);
     }
 
+    // =====================================================
+    // DELETE
+    // =====================================================
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
-        expenseService.deleteExpense(id);
+    public ResponseEntity<Void> deleteExpense(
+            Authentication authentication,
+            @PathVariable String id) {
+
+        String userId = authentication.getPrincipal().toString();
+        expenseService.deleteExpense(userId, id);
         return ResponseEntity.noContent().build();
     }
 
+    // =====================================================
+    // IMPORT
+    // =====================================================
 
     @PostMapping("/import")
     public ResponseEntity<String> importExpenses(
+            Authentication authentication,
             @RequestParam("file") MultipartFile file) {
+
+        String userId = authentication.getPrincipal().toString();
 
         ImportAudit audit = auditService.startAudit(
                 file.getOriginalFilename(),
                 ImportType.CSV
         );
 
-        csvExpenseUploadService.importAsync(file, audit);
+        csvExpenseUploadService.importAsync(file, audit, userId);
 
         return ResponseEntity
                 .accepted()
-                .body("Expenses Imported Sucessfully.");
+                .body("Expenses imported successfully");
     }
-
 }

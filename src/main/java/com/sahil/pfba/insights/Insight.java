@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,6 +15,9 @@ public class Insight {
 
     @Id
     private String id;
+
+    @Column(nullable = false)
+    private String userId;
 
     @Enumerated(EnumType.STRING)
     private InsightType type;
@@ -37,11 +39,11 @@ public class Insight {
 
     private LocalDateTime lastEvaluatedAt;
 
-    protected Insight() {
-    }
+    protected Insight() {}
 
     private Insight(Builder b) {
         this.id = b.id;
+        this.userId = b.userId; 
         this.type = b.type;
         this.severity = b.severity;
         this.status = b.status;
@@ -51,48 +53,43 @@ public class Insight {
         this.lastEvaluatedAt = b.lastEvaluatedAt;
     }
 
-    @PrePersist
-    void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
+    public String getUserId() {
+        return userId;
     }
-
     public String getId() {
         return id;
     }
-
     public InsightType getType() {
         return type;
     }
-
     public InsightSeverity getSeverity() {
         return severity;
     }
-
     public InsightStatus getStatus() {
         return status;
     }
-
     public String getMessage() {
         return message;
     }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
     public String getExplanation() {
         return explanation;
     }
-
     public LocalDateTime getLastEvaluatedAt() {
         return lastEvaluatedAt;
     }
+    
+
+    // ===============================
+    // BUILDER
+    // ===============================
 
     public static class Builder {
 
         private String id;
+        private String userId; 
         private InsightType type;
         private InsightSeverity severity;
         private InsightStatus status = InsightStatus.ACTIVE;
@@ -103,6 +100,11 @@ public class Insight {
 
         public Builder id(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            this.userId = userId;
             return this;
         }
 
@@ -142,6 +144,9 @@ public class Insight {
         }
 
         public Insight build() {
+            if (userId == null) {
+                throw new IllegalStateException("userId must not be null");
+            }
             return new Insight(this);
         }
     }

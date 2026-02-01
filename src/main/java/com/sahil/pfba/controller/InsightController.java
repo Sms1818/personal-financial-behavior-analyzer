@@ -3,6 +3,8 @@ package com.sahil.pfba.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import com.sahil.pfba.insights.InsightStatus;
 
 @RestController
 @RequestMapping("/api/insights")
+@PreAuthorize("hasRole('USER')")
 public class InsightController {
 
     private final InsightRepository repository;
@@ -28,8 +31,10 @@ public class InsightController {
     =============================== */
 
     @GetMapping
-    public List<Insight> getAll() {
-        return repository.findAll();
+    public List<Insight> getAll(
+            @AuthenticationPrincipal String userId
+    ) {
+        return repository.findByUserId(userId);
     }
 
     /* ===============================
@@ -37,33 +42,49 @@ public class InsightController {
     =============================== */
 
     @PostMapping("/{id}/acknowledge")
-    public void acknowledge(@PathVariable String id) {
-        updateStatus(id, InsightStatus.ACKNOWLEDGED);
+    public void acknowledge(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String id
+    ) {
+        updateStatus(userId, id, InsightStatus.ACKNOWLEDGED);
     }
 
     @PostMapping("/{id}/dismiss")
-    public void dismiss(@PathVariable String id) {
-        updateStatus(id, InsightStatus.DISMISSED);
+    public void dismiss(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String id
+    ) {
+        updateStatus(userId, id, InsightStatus.DISMISSED);
     }
 
     @PostMapping("/{id}/resolve")
-    public void resolve(@PathVariable String id) {
-        updateStatus(id, InsightStatus.RESOLVED);
+    public void resolve(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String id
+    ) {
+        updateStatus(userId, id, InsightStatus.RESOLVED);
     }
 
     /* ===============================
        INTERNAL
     =============================== */
 
-    private void updateStatus(String id, InsightStatus status) {
-        Insight insight = repository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Insight not found: " + id)
-                );
+    private void updateStatus(
+            String userId,
+            String insightId,
+            InsightStatus status
+    ) {
+        Insight insight =
+                repository
+                        .findByIdAndUserId(insightId, userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Insight not found")
+                        );
 
         Insight updated =
                 new Insight.Builder()
                         .id(insight.getId())
+                        .userId(userId)
                         .type(insight.getType())
                         .severity(insight.getSeverity())
                         .message(insight.getMessage())

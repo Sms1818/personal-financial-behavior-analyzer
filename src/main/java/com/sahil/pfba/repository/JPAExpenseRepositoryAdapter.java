@@ -13,51 +13,77 @@ import com.sahil.pfba.domain.TransactionType;
 
 @Repository
 @Profile("prod")
-public class JPAExpenseRepositoryAdapter implements ExpenseRepository{
+public class JPAExpenseRepositoryAdapter implements ExpenseRepository {
+
     private final ExpenseJPARepository expenseJPARepository;
 
-    public JPAExpenseRepositoryAdapter(ExpenseJPARepository expenseJPARepository){
-        this.expenseJPARepository=expenseJPARepository;
+    public JPAExpenseRepositoryAdapter(
+            ExpenseJPARepository expenseJPARepository
+    ) {
+        this.expenseJPARepository = expenseJPARepository;
     }
 
+    // ============================
+    // WRITE
+    // ============================
+
     @Override
-    public Expense save(Expense expense){
+    public Expense save(Expense expense) {
         return expenseJPARepository.save(expense);
     }
 
     @Override
-    public Optional<Expense> findLatestById(String id){
-        return expenseJPARepository.findLatestById(id);
-    }
-
-    @Override
-    public List<Expense> findAll() {
-        return expenseJPARepository.findAll();
-    }
-
-    @Override
-    public List<Expense> findByCategory(Category category) {
-        return expenseJPARepository.findLatestByCategory(category);
-    }
-
-    @Override
-    public List<Expense> findByDateRange(LocalDate start, LocalDate end) {
-        return expenseJPARepository.findByDateRange(start, end);
-    }
-
-    @Override
-    public void saveAll(List<Expense> expenses) {
+    public void saveAll(String userId,List<Expense> expenses) {
         expenseJPARepository.saveAll(expenses);
     }
 
+
     @Override
-    public List<Expense> findHistoryById(String id) {
-        return expenseJPARepository.findHistoryById(id);
+    public List<Expense> findAllByUser(String userId) {
+        return expenseJPARepository.findAllByUser(userId);
     }
 
     @Override
-    public List<Expense> findByType(TransactionType type) {
-        return expenseJPARepository.findByType(type);
+    public Optional<Expense> findLatestById(
+            String userId,
+            String expenseId
+    ) {
+        return expenseJPARepository.findLatestById(userId, expenseId);
     }
 
+    @Override
+    public List<Expense> findHistoryById(
+            String userId,
+            String expenseId
+    ) {
+        return expenseJPARepository.findHistoryById(userId, expenseId);
+    }
+
+    @Override
+    public List<Expense> findByCategory(
+            String userId,
+            Category category
+    ) {
+        return expenseJPARepository
+                .findLatestByCategory(userId, category);
+    }
+
+    @Override
+    public List<Expense> findByDateRange(
+            String userId,
+            LocalDate start,
+            LocalDate end
+    ) {
+        return expenseJPARepository
+                .findByDateRange(userId, start, end);
+    }
+
+    @Override
+    public List<Expense> findByType(
+            String userId,
+            TransactionType type
+    ) {
+        return expenseJPARepository
+                .findByType(userId, type);
+    }
 }

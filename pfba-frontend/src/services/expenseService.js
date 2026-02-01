@@ -1,7 +1,10 @@
 import { API_BASE_URL } from "../api/config";
+import { getAuthHeaders } from "./apiClient";
 
 export async function fetchExpenses() {
-  const response = await fetch(`${API_BASE_URL}/expenses`);
+  const response = await fetch(`${API_BASE_URL}/expenses`,{
+    headers: getAuthHeaders(false),
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch expenses");
   }
@@ -11,9 +14,7 @@ export async function fetchExpenses() {
 export async function createExpense(expense) {
   const response = await fetch(`${API_BASE_URL}/expenses`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(false),
     body: JSON.stringify(expense),
   });
   if (!response.ok) {
@@ -25,9 +26,7 @@ export async function createExpense(expense) {
 export async function updateExpense(id, updatedExpense) {
   const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(false),
     body: JSON.stringify(updatedExpense),
   });
 
@@ -40,6 +39,7 @@ export async function updateExpense(id, updatedExpense) {
 
 export async function deleteExpense(id) {
   const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
+    headers: getAuthHeaders(false),
     method: "DELETE",
   });
 
@@ -54,6 +54,7 @@ export async function uploadExpenseCSV(file) {
 
   const res = await fetch(`${API_BASE_URL}/expenses/import`, {
     method: "POST",
+    headers: getAuthHeaders(true),
     body: formData,
   });
   if (!res.ok) {

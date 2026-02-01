@@ -10,16 +10,27 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "expenses")
 @IdClass(ExpenseId.class)
 public class Expense {
+
     @Id
     private String id;
+
+    @Id
+    private int version;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private String description;
 
@@ -33,35 +44,40 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     private ExpenseStatus status;
 
-    @Id
-    private int version;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
+    @Column(nullable = false)
     private TransactionType transactionType;
 
-    
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    protected Expense() {
-    }
+    protected Expense() {}
 
-    private Expense(Builder builder){
-        this.id=builder.id;
+    private Expense(Builder builder) {
+        this.id = builder.id;
+        this.version = builder.version;
+        this.user = builder.user;
         this.description = builder.description;
         this.amount = builder.amount;
         this.category = builder.category;
         this.date = builder.date;
-        this.status=builder.status;
-        this.version=builder.version;
-        this.transactionType=builder.transactionType;
+        this.status = builder.status;
+        this.transactionType = builder.transactionType;
         this.createdAt = builder.createdAt;
     }
-    
-    public String getId(){
+
+    public String getId() {
         return id;
     }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -82,97 +98,105 @@ public class Expense {
         return status;
     }
 
-    public int getVersion(){
-        return version;
-    }
-
-    public TransactionType getTransactionType(){
+    public TransactionType getTransactionType() {
         return transactionType;
     }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public static class Builder {
+
         private String id = UUID.randomUUID().toString();
+        private int version = 1;
+        private User user;
+    
         private String description;
         private BigDecimal amount;
         private Category category;
         private LocalDate date;
-        private ExpenseStatus status= ExpenseStatus.ACTIVE;
-        private int version=1;
-        private TransactionType transactionType=TransactionType.DEBIT;
+        private ExpenseStatus status = ExpenseStatus.ACTIVE;
+        private TransactionType transactionType = TransactionType.DEBIT;
         private LocalDateTime createdAt = LocalDateTime.now();
-
-
-        public Builder id(String id){
-            this.id=id;
-            return this;
-
-        }
-
-        public Builder description(String description){
-            this.description=description;
+    
+        // ✅ ADD THIS
+        public Builder id(String id) {
+            this.id = id;
             return this;
         }
+    
+        public Builder user(User user) {
+            this.user = user;
+            return this;
+        }
+    
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+    
         public Builder amount(BigDecimal amount) {
             this.amount = amount;
             return this;
         }
-
+    
         public Builder category(Category category) {
             this.category = category;
             return this;
         }
-
+    
         public Builder date(LocalDate date) {
             this.date = date;
             return this;
         }
-
+    
         public Builder status(ExpenseStatus status) {
             this.status = status;
             return this;
         }
-
-        public Builder version(int version){
-            this.version=version;
+    
+        public Builder transactionType(TransactionType transactionType) {
+            this.transactionType = transactionType;
             return this;
         }
-
-        public Builder transactionType(TransactionType transactionType){
-            this.transactionType=transactionType;
+    
+        public Builder version(int version) {
+            this.version = version;
             return this;
         }
+    
         public Builder createdAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
             return this;
         }
-        
-
+    
         public Expense build() {
+            Objects.requireNonNull(user, "user must not be null");
             Objects.requireNonNull(amount, "amount must not be null");
             Objects.requireNonNull(category, "category must not be null");
             Objects.requireNonNull(date, "date must not be null");
-            Objects.requireNonNull(status, "status must not be null");
             Objects.requireNonNull(transactionType, "transactionType must not be null");
+    
             if (version <= 0) {
                 throw new IllegalArgumentException("Version must be positive");
             }
+    
             return new Expense(this);
         }
     }
 
     @Override
-    public boolean equals(Object o){
-        if(this==o) return true;
-        if(o==null || getClass()!=o.getClass()) return false;
-        Expense expense=(Expense) o;
-        return id.equals(expense.id);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Expense)) return false;
+        Expense expense = (Expense) o;
+        return version == expense.version &&
+               Objects.equals(id, expense.id);
     }
 
     @Override
-    public int hashCode(){
-        return id.hashCode();
+    public int hashCode() {
+        return Objects.hash(id, version);
     }
 }

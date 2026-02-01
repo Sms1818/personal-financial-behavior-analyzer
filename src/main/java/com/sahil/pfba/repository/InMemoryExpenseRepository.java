@@ -2,6 +2,7 @@ package com.sahil.pfba.repository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,71 +20,130 @@ import com.sahil.pfba.domain.TransactionType;
 @Repository
 @Profile("dev")
 public class InMemoryExpenseRepository implements ExpenseRepository {
-    private final Map<String, List<Expense>> store=new ConcurrentHashMap<>();
+
+    /**
+     * Structure:
+     *
+     * userId
+     *   └── expenseId
+     *         └── versions (v1, v2, v3...)
+     */
+    private final Map<String, Map<String, List<Expense>>> store =
+            new ConcurrentHashMap<>();
+
+    // ============================
+    // SAVE
+    // ============================
 
     @Override
-    public Expense save(Expense expense){
-        store.computeIfAbsent(expense.getId(), k->new ArrayList<>()).add(expense);
+    public Expense save(Expense expense) {
+
+        String userId = expense.getUser().getId();
+        String expenseId = expense.getId();
+
+        store
+            .computeIfAbsent(userId, u -> new ConcurrentHashMap<>())
+            .computeIfAbsent(expenseId, e -> new ArrayList<>())
+            .add(expense);
+
         return expense;
     }
 
     @Override
-    public Optional<Expense> findLatestById(String id){
-        List<Expense> versions=store.get(id);
-        if(versions==null || versions.isEmpty()){
+    public void saveAll(String userId,List<Expense> expenses) {
+        expenses.forEach(this::save);
+    }
+
+    // ============================
+    // FIND ALL (LATEST ONLY)
+    // ============================
+
+    @Override
+    public List<Expense> findAllByUser(String userId) {
+
+        return store.getOrDefault(userId, Map.of())
+                .values()
+                .stream()
+                .map(versions -> versions.get(versions.size() - 1))
+                .filter(e -> e.getStatus() == ExpenseStatus.ACTIVE)
+                .sorted(Comparator.comparing(Expense::getCreatedAt).reversed())
+                .collect(Collectors.toList());
+    }
+
+    // ============================
+    // FIND LATEST BY ID
+    // ============================
+
+    @Override
+    public Optional<Expense> findLatestById(String userId, String expenseId) {
+
+        List<Expense> versions =
+                store.getOrDefault(userId, Map.of()).get(expenseId);
+
+        if (versions == null || versions.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(versions.get(versions.size()-1));
+
+        return Optional.of(versions.get(versions.size() - 1));
     }
 
-    @Override
-    public List<Expense> findHistoryById(String id){
-        return store.getOrDefault(id, List.of());
-    }
-    
-    @Override
-    public List<Expense> findAll(){
-        return store.values()
-               .stream()
-               .map(list->list.get(list.size()-1))
-               .filter(e->e.getStatus()!=null && e.getStatus()==ExpenseStatus.ACTIVE)
-               .collect(Collectors.toList());
-    }
+    // ============================
+    // HISTORY
+    // ============================
 
     @Override
-    public List<Expense> findByCategory(Category category){
-        return store.values()
-        .stream()
-        .map(list->list.get(list.size()-1))
-        .filter(e->e.getStatus()!=null && e.getStatus()==ExpenseStatus.ACTIVE)
-        .filter(e->e.getCategory()==category)
-        .collect(Collectors.toList());
-            
+    public List<Expense> findHistoryById(String userId, String expenseId) {
+
+        return new ArrayList<>(
+                store.getOrDefault(userId, Map.of())
+                     .getOrDefault(expenseId, List.of())
+        );
     }
 
+    // ============================
+    // CATEGORY
+    // ============================
+
     @Override
-    public List<Expense> findByDateRange(LocalDate start, LocalDate end){
-        return store.values()
-        .stream()
-        .map(list->list.get(list.size()-1))
-        .filter(e->e.getStatus()!=null && e.getStatus()==ExpenseStatus.ACTIVE)
-        .filter(e-> !e.getDate().isBefore(start) && !e.getDate().isAfter(end))
-        .collect(Collectors.toList());
-    }
-    @Override
-    public void saveAll(List<Expense> expenses) {
-        for (Expense expense : expenses) {
-            save(expense);
-        }
-    }
-    @Override
-    public List<Expense> findByType(TransactionType type) {
-        return store.values()
-        .stream()
-        .map(list->list.get(list.size()-1))
-        .filter(e->e.getStatus()!=null && e.getStatus()==ExpenseStatus.ACTIVE)
-        .filter(e->e.getTransactionType().equals(type))
-        .collect(Collectors.toList());
+    public List<Expense> findByCategory(String userId, Category category) {
+
+        return findAllByUser(userId)
+                .stream()
+                .filter(e -> e.getCategory() == category)
+                .collect(Collectors.toList());
     }
 
+    // ============================
+    // DATE RANGE
+    // ============================
+
+    @Override
+    public List<Expense> findByDateRange(
+            String userId,
+            LocalDate start,
+            LocalDate end
+    ) {
+        return findAllByUser(userId)
+                .stream()
+                .filter(e ->
+                        !e.getDate().isBefore(start) &&
+                        !e.getDate().isAfter(end)
+                )
+                .collect(Collectors.toList());
+    }
+
+    // ============================
+    // TRANSACTION TYPE
+    // ============================
+
+    @Override
+    public List<Expense> findByType(
+            String userId,
+            TransactionType type
+    ) {
+        return findAllByUser(userId)
+                .stream()
+                .filter(e -> e.getTransactionType() == type)
+                .collect(Collectors.toList());
+    }
 }

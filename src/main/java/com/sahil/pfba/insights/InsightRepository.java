@@ -1,6 +1,7 @@
 package com.sahil.pfba.insights;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,31 +10,20 @@ import org.springframework.stereotype.Repository;
 public interface InsightRepository
         extends JpaRepository<Insight, String> {
 
-    List<Insight> findByStatus(InsightStatus status);
+    List<Insight> findByUserId(String userId);
 
-    List<Insight> findByType(InsightType type);
+    List<Insight> findByUserIdAndStatus(
+            String userId,
+            InsightStatus status
+    );
 
-    default List<Insight> findActive() {
-        return findByStatus(InsightStatus.ACTIVE);
-    }
+    List<Insight> findByUserIdAndType(
+            String userId,
+            InsightType type
+    );
 
-    default void updateInsightStatus(
-            String insightId,
-            InsightStatus status) {
-        findById(insightId).ifPresent(existing -> {
-
-            Insight updated = new Insight.Builder()
-                    .id(existing.getId())
-                    .type(existing.getType())
-                    .severity(existing.getSeverity())
-                    .status(status)
-                    .message(existing.getMessage())
-                    .explanation(existing.getExplanation())
-                    .createdAt(existing.getCreatedAt())
-                    .lastEvaluatedAt(java.time.LocalDateTime.now())
-                    .build();
-
-            save(updated);
-        });
-    }
+    Optional<Insight> findByIdAndUserId(
+            String id,
+            String userId
+    );
 }

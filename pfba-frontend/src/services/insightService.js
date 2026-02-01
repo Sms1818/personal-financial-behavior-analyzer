@@ -1,11 +1,11 @@
 import { API_BASE_URL } from "../api/config";
 
-/* =======================
-   READ
-======================= */
+import { getAuthHeaders } from "./apiClient";
 
 export const getAllInsights = async () => {
-  const res = await fetch(`${API_BASE_URL}/insights`);
+  const res = await fetch(`${API_BASE_URL}/insights`,{
+    headers: getAuthHeaders(false),
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch insights");
   }
@@ -14,7 +14,9 @@ export const getAllInsights = async () => {
 
 export const getInsightExplanation = async insightId => {
   const res = await fetch(
-    `${API_BASE_URL}/insights/${insightId}/explanation`
+    `${API_BASE_URL}/insights/${insightId}/explanation`,{
+      headers: getAuthHeaders(false),
+    }
   );
 
   if (!res.ok) {
@@ -31,7 +33,7 @@ export const getInsightExplanation = async insightId => {
 export const acknowledgeInsight = async id => {
   const res = await fetch(
     `${API_BASE_URL}/insights/${id}/acknowledge`,
-    { method: "POST" }
+    { method: "POST",headers: getAuthHeaders(false), }
   );
 
   if (!res.ok) {
@@ -42,7 +44,7 @@ export const acknowledgeInsight = async id => {
 export const dismissInsight = async id => {
   const res = await fetch(
     `${API_BASE_URL}/insights/${id}/dismiss`,
-    { method: "POST" }
+    { method: "POST" , headers: getAuthHeaders(false),}
   );
 
   if (!res.ok) {
@@ -53,7 +55,7 @@ export const dismissInsight = async id => {
 export const resolveInsight = async id => {
   const res = await fetch(
     `${API_BASE_URL}/insights/${id}/resolve`,
-    { method: "POST" }
+    { method: "POST", headers: getAuthHeaders(false), }
   );
 
   if (!res.ok) {
@@ -65,7 +67,8 @@ export const generateInsights = async () => {
   const res=await fetch(
     `${API_BASE_URL}/insights/generate`,
     {
-      method: "POST"
+      method: "POST",
+      headers: getAuthHeaders(),
     }
   );
   if (!res.ok) {

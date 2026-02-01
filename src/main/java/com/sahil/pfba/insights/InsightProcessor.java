@@ -32,48 +32,36 @@ public class InsightProcessor {
     }
 
     @Transactional
-    public void generate() {
+    public void generate(String userId) {
 
-        System.out.println("=== INSIGHT GENERATION STARTED ===");
-
-        List<Expense> expenses = expenseService.getAllExpenses();
+        List<Expense> expenses =
+                expenseService.getAllExpenses(userId);
 
         if (expenses.isEmpty()) {
-            System.out.println("NO EXPENSES FOUND");
             return;
         }
 
-        // ✅ Build expense summary
         ExpenseSummary summary =
                 ExpenseSummaryBuilder.build(expenses);
 
-        // ✅ Call LLM (multi-insight)
         MultiInsightResponse response =
                 llmClient.generateInsightFromSummary(summary);
 
-        if (response == null
-                || response.getInsights() == null
-                || response.getInsights().isEmpty()) {
-
-            System.out.println("❌ NO INSIGHTS RETURNED FROM LLM");
+        if (response == null || response.getInsights() == null) {
             return;
         }
 
-        System.out.println(
-                "LLM GENERATED " + response.getInsights().size() + " INSIGHTS"
-        );
-
-        // ✅ Save each insight independently
         for (InsightExplanation explanation : response.getInsights()) {
 
             Insight insight =
                     new Insight.Builder()
                             .id(UUID.randomUUID().toString())
+                            .userId(userId)
                             .type(InsightType.GENERAL)
                             .severity(
-                                explanation.getSeverity() != null
-                                    ? explanation.getSeverity()
-                                    : InsightSeverity.MEDIUM
+                                    explanation.getSeverity() != null
+                                            ? explanation.getSeverity()
+                                            : InsightSeverity.MEDIUM
                             )
                             .status(InsightStatus.ACTIVE)
                             .message(explanation.getSummary())
@@ -82,10 +70,6 @@ public class InsightProcessor {
                             .build();
 
             insightRepository.save(insight);
-
-            System.out.println("✅ SAVED AI INSIGHT → " + explanation.getSummary());
         }
-
-        System.out.println("=== INSIGHT GENERATION FINISHED ===");
     }
 }

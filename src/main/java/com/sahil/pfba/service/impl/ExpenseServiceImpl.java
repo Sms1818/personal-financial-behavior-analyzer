@@ -18,47 +18,90 @@ import com.sahil.pfba.service.ExpenseService;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
+
     private final ExpenseRepository expenseRepository;
-    
+
     public ExpenseServiceImpl(ExpenseRepository expenseRepository) {
         this.expenseRepository = expenseRepository;
-        
     }
+
+    // =====================================================
+    // CREATE
+    // =====================================================
 
     @Override
     @Transactional
-    public Expense addExpense(Expense expense) {
-        return expenseRepository.save(expense);
+    public Expense addExpense(String userId, Expense expense) {
+
+        Expense expenseToSave = new Expense.Builder()
+                .id(expense.getId())
+                .user(expense.getUser())
+                .description(expense.getDescription())
+                .amount(expense.getAmount())
+                .category(expense.getCategory())
+                .date(expense.getDate())
+                .transactionType(expense.getTransactionType())
+                .version(1)
+                .status(ExpenseStatus.ACTIVE)
+                .build();
+
+        return expenseRepository.save(expenseToSave);
+    }
+
+    // =====================================================
+    // READ
+    // =====================================================
+
+    @Override
+    public List<Expense> getAllExpenses(String userId) {
+        return expenseRepository.findAllByUser(userId);
     }
 
     @Override
-    public List<Expense> getAllExpenses() {
-        return expenseRepository.findAll();
+    public List<Expense> getExpensesByCategory(
+            String userId,
+            Category category) {
+        return expenseRepository.findByCategory(userId, category);
     }
 
     @Override
-    public List<Expense> getExpensesByCategory(Category category) {
-        return expenseRepository.findByCategory(category);
+    public List<Expense> getExpensesByDateRange(
+            String userId,
+            LocalDate start,
+            LocalDate end) {
+        return expenseRepository.findByDateRange(userId, start, end);
     }
 
     @Override
-    public List<Expense> getExpensesByDateRange(LocalDate start, LocalDate end) {
-        return expenseRepository.findByDateRange(start, end);
+    public List<Expense> getExpensesByType(
+            String userId,
+            TransactionType type) {
+        return expenseRepository.findByType(userId, type);
     }
 
-    
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
     @Override
     @Transactional
-    public Expense updateExpense(String id, UpdateExpenseRequest request) {
-        Expense existing = expenseRepository.findLatestById(id)
+    public Expense updateExpense(
+            String userId,
+            String expenseId,
+            UpdateExpenseRequest request) {
+
+        Expense existing = expenseRepository
+                .findLatestById(userId, expenseId)
                 .orElseThrow(() -> new RuntimeException("Expense not found"));
 
         if (existing.getStatus() == ExpenseStatus.DELETED) {
-            throw new InvalidExpenseOperationException("Cannot update a deleted expense");
+            throw new InvalidExpenseOperationException(
+                    "Cannot update deleted expense");
         }
 
         Expense updated = new Expense.Builder()
                 .id(existing.getId())
+                .user(existing.getUser())
                 .description(request.description)
                 .amount(request.amount)
                 .category(request.category)
@@ -70,13 +113,20 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .build();
 
         return expenseRepository.save(updated);
-
     }
+
+    // =====================================================
+    // DELETE (SOFT DELETE)
+    // =====================================================
 
     @Override
     @Transactional
-    public void deleteExpense(String id) {
-        Expense existing = expenseRepository.findLatestById(id)
+    public void deleteExpense(
+            String userId,
+            String expenseId) {
+
+        Expense existing = expenseRepository
+                .findLatestById(userId, expenseId)
                 .orElseThrow(() -> new RuntimeException("Expense not found"));
 
         if (existing.getStatus() == ExpenseStatus.DELETED) {
@@ -85,6 +135,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         Expense deleted = new Expense.Builder()
                 .id(existing.getId())
+                .user(existing.getUser())
                 .description(existing.getDescription())
                 .amount(existing.getAmount())
                 .category(existing.getCategory())
@@ -98,22 +149,21 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseRepository.save(deleted);
     }
 
-    @Override
-    public List<Expense> getExpenseHistory(String id) {
-        return expenseRepository.findHistoryById(id);
-    }
+    // =====================================================
+    // HISTORY
+    // =====================================================
 
     @Override
-    public void saveAllExpenses(List<Expense> expenses) {
-        if (expenses == null || expenses.isEmpty()) {
-            return;
-        }
-        expenseRepository.saveAll(expenses);
+    public List<Expense> getExpenseHistory(
+            String userId,
+            String expenseId) {
+        return expenseRepository.findHistoryById(userId, expenseId);
     }
 
-    @Override
-    public List<Expense> getExpensesByType(TransactionType type) {
-        return expenseRepository.findByType(type);
-    }
+    // =====================================================
+    // BULK
+    // =====================================================
+
+    
 
 }
