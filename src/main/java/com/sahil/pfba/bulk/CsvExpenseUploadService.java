@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.sahil.pfba.audit.ImportAudit;
 import com.sahil.pfba.domain.Category;
@@ -38,26 +38,17 @@ public class CsvExpenseUploadService {
     @Async("analysisExecutor")
     @Transactional
     public void importAsync(
-            MultipartFile file,
+            byte[] bytes,
             ImportAudit audit,
             String userId) {
 
         try {
-            // ✅ VERY IMPORTANT FIX
-            byte[] bytes = file.getBytes();
+            BulkUploadResult result = parse(bytes, userId);
 
-            BulkUploadResult result =
-                    parse(bytes, userId);
-
-            importProcessor.process(
-                    result,
-                    audit,
-                    userId
-            );
+            importProcessor.process(result, audit, userId);
 
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to import CSV", e);
+            throw new RuntimeException("Failed to import CSV", e);
         }
     }
 
@@ -74,10 +65,9 @@ public class CsvExpenseUploadService {
 
         int rowNumber = 0;
 
-        try (BufferedReader reader =
-                     new BufferedReader(
-                         new InputStreamReader(
-                             new ByteArrayInputStream(bytes)))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        new ByteArrayInputStream(bytes)))) {
 
             String line;
 
@@ -85,19 +75,19 @@ public class CsvExpenseUploadService {
                 rowNumber++;
 
                 // skip header
-                if (rowNumber == 1) continue;
+                if (rowNumber == 1)
+                    continue;
 
                 try {
-                    Expense expense =
-                            parseLine(line, userId);
+                    Expense expense = parseLine(line, userId);
 
                     validExpenses.add(expense);
 
                 } catch (Exception e) {
                     errors.add(
-                        new BulkUploadError(
-                            rowNumber,
-                            e.getMessage()));
+                            new BulkUploadError(
+                                    rowNumber,
+                                    e.getMessage()));
                 }
             }
 
@@ -120,26 +110,23 @@ public class CsvExpenseUploadService {
             String line,
             String userId) {
 
-        String[] tokens = line.split(",");
+        String[] tokens = line.trim().split("\\s*,\\s*");
 
         if (tokens.length != 6) {
             throw new IllegalArgumentException(
                     "Invalid column count");
         }
 
-        String id = tokens[0].trim();
+        String id = UUID.randomUUID().toString();
+
         String description = tokens[1].trim();
-        var amount =
-                new java.math.BigDecimal(tokens[2].trim());
+        var amount = new java.math.BigDecimal(tokens[2].trim());
 
-        Category category =
-                Category.valueOf(tokens[3].trim());
+        Category category = Category.valueOf(tokens[3].trim().toUpperCase());
 
-        LocalDate date =
-                LocalDate.parse(tokens[4].trim());
+        LocalDate date = LocalDate.parse(tokens[4].trim());
 
-        TransactionType type =
-                TransactionType.valueOf(tokens[5].trim());
+        TransactionType type = TransactionType.valueOf(clean(tokens[5]));
 
         if (type == TransactionType.DEBIT) {
             amount = amount.negate();
@@ -158,4 +145,9 @@ public class CsvExpenseUploadService {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    private String clean(String value) {
+        return value.replaceAll("[\\r\\n\\uFEFF]", "").trim();
+    }
+
 }

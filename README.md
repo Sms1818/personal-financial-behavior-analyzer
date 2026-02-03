@@ -141,3 +141,4 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 27:** Implemented core authentication foundation using Spring Security.Added User entity, repository, password hashing (BCrypt), and public auth route for registration of user.
 - **Day 28:** Implemented JWT-based authentication for secure token generation. Added backend login flow with password validation and role-based claims. Integrated authentication service layer using Spring Security and BCrypt.
 - **Day 29:** Built and integrated frontend flows for user login and registration. Connected expenses and AI insights to the authenticated user context. CSV expense import is partially implemented but still not persisting data correctly and needs further debugging and resolution.
+- **Day 30:** Fixed CSV expense upload to correctly persist records for the authenticated user.

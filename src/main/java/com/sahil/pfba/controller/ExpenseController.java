@@ -1,5 +1,6 @@
 package com.sahil.pfba.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,7 +68,7 @@ public class ExpenseController {
 
         Expense expense = new Expense.Builder()
                 .id(UUID.randomUUID().toString())
-                .user(new User(userId)) 
+                .user(new User(userId))
                 .description(request.description)
                 .amount(request.amount)
                 .category(request.category)
@@ -160,19 +161,21 @@ public class ExpenseController {
     @PostMapping("/import")
     public ResponseEntity<String> importExpenses(
             Authentication authentication,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
         String userId = authentication.getPrincipal().toString();
 
         ImportAudit audit = auditService.startAudit(
                 file.getOriginalFilename(),
-                ImportType.CSV
-        );
+                ImportType.CSV);
 
-        csvExpenseUploadService.importAsync(file, audit, userId);
+        byte[] bytes = file.getBytes();
+
+        csvExpenseUploadService.importAsync(bytes, audit, userId);
 
         return ResponseEntity
                 .accepted()
-                .body("Expenses imported successfully");
+                .body("Expenses import started");
     }
+
 }
