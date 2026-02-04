@@ -25,7 +25,10 @@ management:
     endpoints:
         web:
             exposure:
-                include: health,info
+                include: health,info,metrics,prometheus
+    endpoint:
+        health:
+            show-details: always
 
 llm:
   gemini:
@@ -34,4 +37,5 @@ llm:
 jwt:
     secret: pfba-super-secure-jwt-signing-key-2026-prod-secret
     expiration-ms: 3600000
+
 

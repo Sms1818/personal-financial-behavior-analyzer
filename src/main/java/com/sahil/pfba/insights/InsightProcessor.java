@@ -12,6 +12,7 @@ import com.sahil.pfba.insights.summary.ExpenseSummary;
 import com.sahil.pfba.insights.summary.ExpenseSummaryBuilder;
 import com.sahil.pfba.llm.LLMClient;
 import com.sahil.pfba.llm.MultiInsightResponse;
+import com.sahil.pfba.metrics.ApplicationMetrics;
 import com.sahil.pfba.service.ExpenseService;
 
 @Service
@@ -20,56 +21,66 @@ public class InsightProcessor {
     private final ExpenseService expenseService;
     private final InsightRepository insightRepository;
     private final LLMClient llmClient;
+    private final ApplicationMetrics metrics;
 
     public InsightProcessor(
             ExpenseService expenseService,
             LLMClient llmClient,
-            InsightRepository insightRepository
-    ) {
+            InsightRepository insightRepository,
+            ApplicationMetrics metrics) {
         this.expenseService = expenseService;
         this.llmClient = llmClient;
         this.insightRepository = insightRepository;
+        this.metrics = metrics;
     }
 
     @Transactional
     public void generate(String userId) {
 
-        List<Expense> expenses =
-                expenseService.getAllExpenses(userId);
+        try {
+            metrics.recordInsightTime(() -> {
 
-        if (expenses.isEmpty()) {
-            return;
-        }
+                List<Expense> expenses = expenseService.getAllExpenses(userId);
 
-        ExpenseSummary summary =
-                ExpenseSummaryBuilder.build(expenses);
+                if (expenses.isEmpty()) {
+                    return null;
+                }
 
-        MultiInsightResponse response =
-                llmClient.generateInsightFromSummary(summary);
+                ExpenseSummary summary = ExpenseSummaryBuilder.build(expenses);
 
-        if (response == null || response.getInsights() == null) {
-            return;
-        }
+                MultiInsightResponse response = llmClient.generateInsightFromSummary(summary);
 
-        for (InsightExplanation explanation : response.getInsights()) {
+                if (response == null || response.getInsights() == null) {
+                    return null;
+                }
 
-            Insight insight =
-                    new Insight.Builder()
+                for (InsightExplanation explanation : response.getInsights()) {
+
+                    Insight insight = new Insight.Builder()
                             .id(UUID.randomUUID().toString())
                             .userId(userId)
                             .type(InsightType.GENERAL)
                             .severity(
                                     explanation.getSeverity() != null
                                             ? explanation.getSeverity()
-                                            : InsightSeverity.MEDIUM
-                            )
+                                            : InsightSeverity.MEDIUM)
                             .status(InsightStatus.ACTIVE)
                             .message(explanation.getSummary())
                             .explanation(JsonUtil.toJson(explanation))
                             .lastEvaluatedAt(LocalDateTime.now())
                             .build();
 
-            insightRepository.save(insight);
+                    insightRepository.save(insight);
+
+                    metrics.insightGenerated(); 
+                }
+
+                return null;
+            });
+
+        } catch (Exception e) {
+            throw new RuntimeException("Insight generation failed", e);
         }
     }
+
 }

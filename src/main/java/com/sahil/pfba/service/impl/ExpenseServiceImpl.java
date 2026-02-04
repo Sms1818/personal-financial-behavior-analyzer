@@ -13,6 +13,7 @@ import com.sahil.pfba.domain.Expense;
 import com.sahil.pfba.domain.ExpenseStatus;
 import com.sahil.pfba.domain.TransactionType;
 import com.sahil.pfba.exception.InvalidExpenseOperationException;
+import com.sahil.pfba.metrics.ApplicationMetrics;
 import com.sahil.pfba.repository.ExpenseRepository;
 import com.sahil.pfba.service.ExpenseService;
 
@@ -20,9 +21,11 @@ import com.sahil.pfba.service.ExpenseService;
 public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
+    private final ApplicationMetrics metrics;
 
-    public ExpenseServiceImpl(ExpenseRepository expenseRepository) {
+    public ExpenseServiceImpl(ExpenseRepository expenseRepository, ApplicationMetrics metrics) {
         this.expenseRepository = expenseRepository;
+        this.metrics = metrics;
     }
 
     // =====================================================
@@ -45,7 +48,10 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .status(ExpenseStatus.ACTIVE)
                 .build();
 
-        return expenseRepository.save(expenseToSave);
+        Expense saved = expenseRepository.save(expenseToSave);
+        metrics.expenseCreated();
+
+        return saved;
     }
 
     // =====================================================

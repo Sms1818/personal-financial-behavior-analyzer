@@ -142,3 +142,4 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 28:** Implemented JWT-based authentication for secure token generation. Added backend login flow with password validation and role-based claims. Integrated authentication service layer using Spring Security and BCrypt.
 - **Day 29:** Built and integrated frontend flows for user login and registration. Connected expenses and AI insights to the authenticated user context. CSV expense import is partially implemented but still not persisting data correctly and needs further debugging and resolution.
 - **Day 30:** Fixed CSV expense upload to correctly persist records for the authenticated user.
+- **Day 31:** Added observability with Actuator, Micrometer, Prometheus, and Grafana. Exposed JVM and domain-level metrics and verified end-to-end monitoring setup. Grafana dashboards planned next.

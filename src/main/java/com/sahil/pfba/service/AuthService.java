@@ -9,6 +9,7 @@ import com.sahil.pfba.controller.dto.RegisterRequest;
 import com.sahil.pfba.controller.dto.RegisterResponse;
 import com.sahil.pfba.domain.Role;
 import com.sahil.pfba.domain.User;
+import com.sahil.pfba.metrics.ApplicationMetrics;
 import com.sahil.pfba.repository.UserRepository;
 
 @Service
@@ -16,11 +17,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final ApplicationMetrics metrics;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, ApplicationMetrics metrics) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.metrics = metrics;
     }
 
     public RegisterResponse register(RegisterRequest request){
@@ -42,12 +45,18 @@ public class AuthService {
     }
 
     public String login(LoginRequest request){
-        User user=userRepository.findByEmail(request.email())
-            .orElseThrow(()-> new RuntimeException("Invalid email or password"));
+        User user = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> {
+            metrics.loginFailure();
+            return new RuntimeException("Invalid email or password");
+        });
 
-        if(!passwordEncoder.matches(request.password(),user.getPassword())){
+        if(!passwordEncoder.matches(request.password(), user.getPassword())){
+            metrics.loginFailure();
             throw new RuntimeException("Invalid credentials");
-        } 
+        }
+
+        metrics.loginSuccess();
         return jwtService.generateToken(
             user.getId(),
             user.getEmail(),
