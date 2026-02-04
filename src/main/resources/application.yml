@@ -1,41 +1,33 @@
 spring:
-    application:
-        name: personal-financial-behavior-analyzer
-    datasource:
-        url: jdbc:postgresql://localhost:5432/pfba
-        username: pfba_user
-        password: pfba_pass
+  application:
+    name: personal-financial-behavior-analyzer
 
-    jpa:
-        hibernate:
-            ddl-auto: update
-        show-sql: true
-        properties:
-            hibernate:
-                format_sql: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
-
-    config:
-        import: optional:file:.env[.properties]
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
-    port: 8080
+  port: 8080
 
 management:
-    endpoints:
-        web:
-            exposure:
-                include: health,info,metrics,prometheus
-    endpoint:
-        health:
-            show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
 
 llm:
   gemini:
     api-key: ${GEMINI_API_KEY}
 
 jwt:
-    secret: pfba-super-secure-jwt-signing-key-2026-prod-secret
-    expiration-ms: 3600000
-
-
+  secret: ${JWT_SECRET}
+  expiration-ms: 3600000
