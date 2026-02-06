@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pfba-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pfba-backend
+  template:
+    metadata:
+      labels:
+        app: pfba-backend
+    spec:
+      containers:
+        - name: backend
+          image: personal-financial-behavior-analyzer-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: JWT_SECRET
+              value: "pfba-super-secure-jwt-signing-key-2026-prod-secret"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/pfba"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "pfba_user"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "pfba_pass"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

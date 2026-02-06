@@ -143,4 +143,5 @@ The frontend was connected to backend create and update APIs with reusable form 
 - **Day 29:** Built and integrated frontend flows for user login and registration. Connected expenses and AI insights to the authenticated user context. CSV expense import is partially implemented but still not persisting data correctly and needs further debugging and resolution.
 - **Day 30:** Fixed CSV expense upload to correctly persist records for the authenticated user.
 - **Day 31:** Added observability with Actuator, Micrometer, Prometheus, and Grafana. Exposed JVM and domain-level metrics. Verified end-to-end metrics flow from the application to Prometheus and visualized key system and business KPIs in Grafana. Additionally, dockerized the full application stack (backend, frontend, PostgreSQL, Prometheus, and Grafana) using multi-stage Docker builds and Docker Compose, preparing the system for containerized and cloud-native deployment.
+- **Day 32:** Initiated Kubernetes deployment for backend and database. Added Deployments and Services with multi-replica pods and debugged real-world issues such as service discovery, pod restarts, and startup dependency timing.
   
