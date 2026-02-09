@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: pfba-frontend
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pfba-frontend
+  template:
+    metadata:
+      labels:
+        app: pfba-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: personal-financial-behavior-analyzer-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: BACKEND_URL
+              value: "http://localhost:30081"

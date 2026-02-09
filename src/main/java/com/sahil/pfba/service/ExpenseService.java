@@ -43,8 +43,5 @@ public interface ExpenseService {
             TransactionType type
     );
 
-    
-
-
 
 }

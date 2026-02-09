@@ -120,7 +120,7 @@ public class Expense {
         private TransactionType transactionType = TransactionType.DEBIT;
         private LocalDateTime createdAt = LocalDateTime.now();
     
-        // ✅ ADD THIS
+        
         public Builder id(String id) {
             this.id = id;
             return this;

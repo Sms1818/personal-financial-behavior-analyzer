@@ -16,7 +16,7 @@ import com.sahil.pfba.insights.InsightRepository;
 import com.sahil.pfba.insights.InsightStatus;
 
 @RestController
-@RequestMapping("/api/insights")
+@RequestMapping("/insights")
 @PreAuthorize("hasRole('USER')")
 public class InsightController {
 
