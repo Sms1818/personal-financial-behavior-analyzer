@@ -157,44 +157,43 @@ Docker → Kubernetes → Prometheus → Grafana
 
 **Day 15:** Integrated PostgreSQL with clean environment-based switching (in-memory for dev, JPA for prod), resolved repository and profile clashes to stabilize the backend for long-term use, and validated production startup. Bootstrapped a React + Vite frontend and completed the first end-to-end integration  
 
-**Day 16:** Implemented React-based frontend pages to display Expenses and Insights with client-side routing  
+- **Day 16:** Implemented React-based frontend pages to display Expenses and Insights, integrating them with backend APIs (/api/expenses and /api/insights), setting up client-side routing using React Router for /expenses and /insights, and establishing a clean, scalable frontend structure with dedicated pages and service layers for API communication. 
 
-**Day 17:** Added inline Add/Edit Expense modal with backend integration  
+- **Day 17:** The Expense Management frontend was extended beyond read-only views by adding an inline Add/Edit Expense modal within the Expense List page. The frontend was connected to backend create and update APIs with reusable form logic and automatic list refresh after successful actions. 
 
-**Day 18:** Added real-time summaries and animated category breakdown  
+- **Day 18:** Added real-time summaries including total spend, top category, recent expense, and animated category-wise breakdown bars.Improved UX with inline add/edit/delete expense modal and automatic list refresh. 
 
-**Day 19:** Implemented filtering, sorting, search, and dark-themed dashboard  
+- **Day 19:** Enhanced the Expense page with advanced filtering, sorting, and search capabilities including date-range filters.Improved UI/UX with a dark-themed dashboard, sticky insights panel, category-wise breakdown, and smart spending insights. 
 
-**Day 20:** Dedicated Insights page with severity grouping and lifecycle filters  
+- **Day 20:** Implemented a dedicated Insights page with severity-based grouping, status filtering (Active, Acknowledged, Resolved, Dismissed), and overview statistics. 
 
-**Day 21:** Interactive charts and CSV upload UI  
+- **Day 21:** Enhanced UI with interactive charts (line, bar, pie) for deeper expense insights.Improved expense and insight pages with better visual hierarchy and data clarity.Added CSV upload UI to support bulk expense imports alongside manual entry. 
 
-**Day 22:** Full income–expense support with accurate net balance calculation  
+- **Day 22:** Added full income–expense support with proper debit/credit handling, accurate net balance calculation, and CSV import enhancements. Improved dashboard analytics, charts, and summaries to ensure clean financial reporting and production-ready data consistency. 
 
-**Day 23:** Net Cash Flow and Savings Rate graphs  
+- **Day 23:** Added interactive financial graphs including Net Cash Flow and Savings Rate to visualize spending behavior over time.LLM-powered explanations and recommendations are currently in progress and will be completed next. 
 
-**Day 24:** Fixed Gemini LLM integration  
+- **Day 24:** Fixed Gemini LLM integration by aligning request/response schema and improving JSON parsing stability. 
 
-**Day 25:** Fully transitioned from rule engine to LLM-driven insights  
+- **Day 25:** Removed rule-based insight engine and fully transitioned to LLM-driven insight generation.Implemented expense summary–based AI insight creation with clean backend flow. 
 
-**Day 26:** Multi-insight AI generation with severity classification  
+- **Day 26:** Migrated from single insight to multi-insight AI generation.Added AI-driven severity classification and resolved enum parsing failures. 
 
-**Day 27:** Spring Security authentication foundation  
+- **Day 27:** Implemented core authentication foundation using Spring Security.Added User entity, repository, password hashing (BCrypt), and public auth route for registration of user. 
 
-**Day 28:** JWT login and role-based claims  
+- **Day 28:** Implemented JWT-based authentication for secure token generation. Added backend login flow with password validation and role-based claims. Integrated authentication service layer using Spring Security and BCrypt. 
 
-**Day 29:** Frontend login/register flows integrated  
+- **Day 29:** Built and integrated frontend flows for user login and registration. Connected expenses and AI insights to the authenticated user context. CSV expense import is partially implemented but still not persisting data correctly and needs further debugging and resolution. 
 
-**Day 30:** Fixed CSV upload persistence  
+- **Day 30:** Fixed CSV expense upload to correctly persist records for the authenticated user. 
 
-**Day 31:** Observability stack with Prometheus & Grafana  
+- **Day 31:** Added observability with Actuator, Micrometer, Prometheus, and Grafana. Exposed JVM and domain-level metrics. Verified end-to-end metrics flow from the application to Prometheus and visualized key system and business KPIs in Grafana. Additionally, dockerized the full application stack (backend, frontend, PostgreSQL, Prometheus, and Grafana) using multi-stage Docker builds and Docker Compose, preparing the system for containerized and cloud-native deployment.
 
-**Day 32:** Kubernetes deployments and services  
+- **Day 32:** Initiated Kubernetes deployment for backend and database. Added Deployments and Services with multi-replica pods and debugged real-world issues such as service discovery, pod restarts, and startup dependency timing. 
 
-**Day 33:** NodePort networking  
+- **Day 33:** Simplified cluster networking by replacing Ingress with NodePort services, enabling direct local access to frontend and backend.
 
-**Day 34:** Full production-style cluster with monitoring and stable end-to-end flow  
-
+- **Day 34:** Deployed full observability stack on Kubernetes with Prometheus and Grafana services, verified metrics scraping, dashboards, and end-to-end monitoring. Finalized Docker images, stabilized the cluster, and completed production-ready setup.
 ---
 
 # ▶️ How to Run the Project
