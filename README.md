@@ -127,35 +127,35 @@ Docker → Kubernetes → Prometheus → Grafana
 
 # 📆 Project Progress
 
-**Day 1:** Project setup, domain modeling, thread-safe repository  
+- **Day 1:** Project setup, domain modeling, thread-safe repository  
 
-**Day 2:** Service layer, dependency injection, type safety improvements, domain identity  
+- **Day 2:** Service layer, dependency injection, type safety improvements, domain identity  
 
-**Day 3:** REST controllers, expense APIs, and DTO-based request handling  
+- **Day 3:** REST controllers, expense APIs, and DTO-based request handling  
 
-**Day 4:** API validation, global exception handling, async spending analysis with custom thread pool  
+- **Day 4:** API validation, global exception handling, async spending analysis with custom thread pool  
 
-**Day 5:** Completed full CRUD operations with immutable updates, soft delete using lifecycle states, and proper HTTP error semantics  
+- **Day 5:** Completed full CRUD operations with immutable updates, soft delete using lifecycle states, and proper HTTP error semantics  
 
-**Day 6:** Implemented immutable expense versioning with full audit trail, history APIs  
+- **Day 6:** Implemented immutable expense versioning with full audit trail, history APIs  
 
-**Day 7:** Bulk CSV expense import with validation, partial failure handling, and asynchronous background processing  
+- **Day 7:** Bulk CSV expense import with validation, partial failure handling, and asynchronous background processing  
 
-**Day 8:** Introduced import audit system with lifecycle tracking, audit status APIs, and job observability for asynchronous data ingestion  
+- **Day 8:** Introduced import audit system with lifecycle tracking, audit status APIs, and job observability for asynchronous data ingestion  
 
-**Day 9:** Added intelligent insight foundation with domain modeling, persisted insights, rule-based total spending analysis, and read-only insight APIs  
+- **Day 9:** Added intelligent insight foundation with domain modeling, persisted insights, rule-based total spending analysis, and read-only insight APIs  
 
-**Day 10:** Asynchronous insight generation with idempotency, lifecycle awareness, and severity escalation (LOW → MEDIUM → HIGH)  
+- **Day 10:** Asynchronous insight generation with idempotency, lifecycle awareness, and severity escalation (LOW → MEDIUM → HIGH)  
 
-**Day 11:** Added LLM-based insight explanations with a pluggable LLMClient abstraction, mock support, and graceful fallback logic; attempted real LLM (OpenAI/Gemini) integration but deferred due to API/model compatibility issues  
+- **Day 11:** Added LLM-based insight explanations with a pluggable LLMClient abstraction, mock support, and graceful fallback logic; attempted real LLM (OpenAI/Gemini) integration but deferred due to API/model compatibility issues  
 
-**Day 12:** Fixed issues in insight generation where duplicate records were being created, improved the insight lifecycle (ACTIVE → RESOLVED), refined severity escalation logic, and stabilized the LLM-based explanation flow with proper error handling  
+- **Day 12:** Fixed issues in insight generation where duplicate records were being created, improved the insight lifecycle (ACTIVE → RESOLVED), refined severity escalation logic, and stabilized the LLM-based explanation flow with proper error handling  
 
-**Day 13:** Integrated PostgreSQL using Spring Data JPA, introduced clean repository abstractions to decouple domain logic from persistence, and successfully migrated expense storage from in-memory to database-backed implementation  
+- **Day 13:** Integrated PostgreSQL using Spring Data JPA, introduced clean repository abstractions to decouple domain logic from persistence, and successfully migrated expense storage from in-memory to database-backed implementation  
 
-**Day 14:** Migrated from in-memory storage to PostgreSQL, reinforced async processing boundaries, and stabilized scheduled insight generation with proper lifecycle transitions  
+- **Day 14:** Migrated from in-memory storage to PostgreSQL, reinforced async processing boundaries, and stabilized scheduled insight generation with proper lifecycle transitions  
 
-**Day 15:** Integrated PostgreSQL with clean environment-based switching (in-memory for dev, JPA for prod), resolved repository and profile clashes to stabilize the backend for long-term use, and validated production startup. Bootstrapped a React + Vite frontend and completed the first end-to-end integration  
+- **Day 15:** Integrated PostgreSQL with clean environment-based switching (in-memory for dev, JPA for prod), resolved repository and profile clashes to stabilize the backend for long-term use, and validated production startup. Bootstrapped a React + Vite frontend and completed the first end-to-end integration  
 
 - **Day 16:** Implemented React-based frontend pages to display Expenses and Insights, integrating them with backend APIs (/api/expenses and /api/insights), setting up client-side routing using React Router for /expenses and /insights, and establishing a clean, scalable frontend structure with dedicated pages and service layers for API communication. 
 
