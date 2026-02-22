@@ -11,31 +11,46 @@ export default function CategoryPie({ data }) {
   }
 
   return (
-    <div className="h-56">
+    <div className="h-full w-full relative">
+      <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-3xl -z-10"></div>
       <ResponsivePie
         data={data}
-        colors={({id})=> CATEGORY_COLORS[id] || "#64748B"}
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        innerRadius={0.6}
-        padAngle={0.7}
-        cornerRadius={4}
+        colors={({ id }) => CATEGORY_COLORS[id] || "#64748B"}
+        margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+        innerRadius={0.65}
+        padAngle={1.5}
+        cornerRadius={6}
         activeOuterRadiusOffset={8}
-        borderWidth={1}
-        borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
+        borderWidth={0}
         enableArcLabels={false}
         enableArcLinkLabels={false}
         motionConfig="gentle"
+        tooltip={({ datum }) => (
+          <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/50 p-3 rounded-xl shadow-xl z-50 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200">
+            <div
+              className="w-3 h-3 rounded-full shadow-[0_0_8px_1px]"
+              style={{ backgroundColor: datum.color, boxShadow: `0 0 8px 1px ${datum.color}40` }}
+            />
+            <div>
+              <p className="text-slate-300 text-xs font-medium">{datum.id}</p>
+              <p className="text-white font-bold text-sm tracking-tight">₹{Number(datum.value).toLocaleString()}</p>
+            </div>
+          </div>
+        )}
         theme={{
-          text: { fill: "#cbd5f5" },
-          tooltip: {
-            container: {
-              background: "#020617",
-              color: "#e5e7eb",
-              fontSize: 12,
-              borderRadius: 6,
-            },
-          },
+          text: { fontFamily: "Inter, sans-serif" },
         }}
+        defs={[
+          {
+            id: 'gradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit' },
+              { offset: 100, color: 'inherit', opacity: 0.7 }
+            ],
+          }
+        ]}
+        fill={[{ match: '*', id: 'gradient' }]}
       />
     </div>
   );

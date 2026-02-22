@@ -235,22 +235,44 @@ kubectl apply -f k8s/monitoring
 
 ---
 
-# 🧪 Option 2 — Local Development
+# 🐳 Option 2 — Docker Compose (Recommended for Production-like Testing)
+
+Run the entire stack instantly without Kubernetes.
+
+### Deploy
+```bash
+docker compose up --build -d
+```
+
+### Access
+| Service | URL |
+|--------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8080/api |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
+
+Stop with `docker compose down`.
+
+---
+
+# 💻 Option 3 — Local Development (For Code Changes)
 
 ### Start PostgreSQL
 ```bash
 docker run -d --name pfba-postgres \
 -e POSTGRES_DB=pfba \
--e POSTGRES_USER=postgres \
--e POSTGRES_PASSWORD=postgres \
--p 5432:5432 postgres:16
+-e POSTGRES_USER=pfba_user \
+-e POSTGRES_PASSWORD=pfba_pass \
+-p 5433:5432 postgres:16
 ```
+*(Note: Exposes port 5433 locally to avoid conflicts with other local Postgres instances)*
 
 ### Backend
 ```bash
 mvn spring-boot:run
 ```
-http://localhost:8080
+Available at: http://localhost:8080
 
 ### Frontend
 ```bash
@@ -258,14 +280,15 @@ cd pfba-frontend
 npm install
 npm run dev
 ```
-http://localhost:5173
+Available at: http://localhost:5173
 
 ---
 
 # ⭐ Recommended Workflow
 
-- Use **Kubernetes** for realistic full-stack testing  
-- Use **Local mode** for faster development  
+- Use **Kubernetes** for realistic cloud-native deployment testing
+- Use **Docker Compose** for quick, full-stack verification
+- Use **Local mode** for faster, isolated iterative development
 
 ---
 

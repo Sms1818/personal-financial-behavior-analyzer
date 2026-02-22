@@ -223,38 +223,46 @@ export default function ExpenseList() {
 
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100">
+        <div className="w-full">
             <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* LEFT: Expense List */}
-                <div className="lg:col-span-2 space-y-4">
+                <div className="lg:col-span-2 space-y-4 animate-in fade-in slide-in-from-left-8 duration-700">
                     {/* Header */}
-                    <div className="flex justify-between items-center">
+                    <div className="glass-card rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 className="text-2xl font-semibold">Expenses</h2>
-                            <p className="text-slate-400 text-sm">
+                            <h2 className="text-3xl font-bold tracking-tight text-white">Expenses</h2>
+                            <p className="text-slate-400 text-sm mt-1">
                                 Track and understand your spending
                             </p>
                         </div>
 
-                        <button
-                            onClick={() => {
-                                setSelectedExpense(null);
-                                setShowAddExpense(true);
-                            }}
-                            className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm"
-                        >
-                            + Add Expense
-                        </button>
-                        <button
-                            onClick={() => {
-                                setShowCSVUpload(true);
-                                setSelectedExpense(null);
-                            }}
-                            className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm"
-                        >
-                            ⬆ Upload CSV
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setSelectedExpense(null);
+                                    setShowAddExpense(true);
+                                }}
+                                className="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                </svg>
+                                Add Expense
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowCSVUpload(true);
+                                    setSelectedExpense(null);
+                                }}
+                                className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Upload CSV
+                            </button>
+                        </div>
                     </div>
 
                     <TimeRangeSelector
@@ -266,198 +274,216 @@ export default function ExpenseList() {
                         setToDate={setToDate}
                     />
 
-                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 mb-4">
+                    <div className="glass-card rounded-2xl p-4 md:p-6 mb-4">
+                        <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 mb-4">
 
-                        {/* Category */}
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 text-sm px-3 py-2 rounded-lg
-               text-slate-300 focus:outline-none focus:border-indigo-500"
-                        >
-                            <option value="ALL">All Categories</option>
-                            <option value="FOOD">Food</option>
-                            <option value="TRANSPORTATION">Transportation</option>
-                            <option value="RENT">Rent</option>
-                            <option value="UTILITIES">Utilities</option>
-                            <option value="ENTERTAINMENT">Entertainment</option>
-                            <option value="MEDICAL">Medical</option>
-                            <option value="EDUCATION">Education</option>
-                            <option value="OTHER">Other</option>
-                        </select>
-
-
+                            {/* Category */}
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="input-field py-2"
+                            >
+                                <option value="ALL">All Categories</option>
+                                <option value="FOOD">Food</option>
+                                <option value="TRANSPORTATION">Transportation</option>
+                                <option value="RENT">Rent</option>
+                                <option value="UTILITIES">Utilities</option>
+                                <option value="ENTERTAINMENT">Entertainment</option>
+                                <option value="MEDICAL">Medical</option>
+                                <option value="EDUCATION">Education</option>
+                                <option value="OTHER">Other</option>
+                            </select>
 
 
-                        {/* Sort */}
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 text-sm px-3 py-2 rounded-lg
-               text-slate-300 focus:outline-none focus:border-indigo-500"
-                        >
-                            <option value="DATE_DESC">Newest First</option>
-                            <option value="DATE_ASC">Oldest First</option>
-                            <option value="AMOUNT_DESC">Amount ↓</option>
-                            <option value="AMOUNT_ASC">Amount ↑</option>
-                        </select>
-
-                        {/* Search */}
-                        <input
-                            type="text"
-                            placeholder="Search description…"
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 text-sm px-3 py-2 rounded-lg
-               text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                        />
 
 
-                    </div>
-                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 mb-4">
-                        <p className="text-xs text-slate-500 mb-2">
-                            Showing {filteredAndSortedExpenses.length} of {expenses.length} expenses
-                        </p>
+                            {/* Sort */}
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="input-field py-2"
+                            >
+                                <option value="DATE_DESC">Newest First</option>
+                                <option value="DATE_ASC">Oldest First</option>
+                                <option value="AMOUNT_DESC">Amount ↓</option>
+                                <option value="AMOUNT_ASC">Amount ↑</option>
+                            </select>
 
-                        <button
-                            onClick={() => {
-                                setSelectedCategory("ALL");
-                                setSearchText("");
-                                setFromDate("");
-                                setToDate("");
-                                setSortBy("DATE_DESC");
-                            }}
-                            className="text-sm text-indigo-400 hover:text-indigo-300
-                 underline underline-offset-4 whitespace-nowrap"
-                        >
-                            Reset
-                        </button>
+                            {/* Search */}
+                            <input
+                                type="text"
+                                placeholder="Search description…"
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                className="input-field py-2"
+                            />
 
 
+                        </div>
+                        <div className="flex flex-wrap lg:flex-nowrap justify-between items-center gap-3">
+                            <p className="text-xs font-medium text-slate-400">
+                                Showing {filteredAndSortedExpenses.length} of {expenses.length} expenses
+                            </p>
+
+                            <button
+                                onClick={() => {
+                                    setSelectedCategory("ALL");
+                                    setSearchText("");
+                                    setFromDate("");
+                                    setToDate("");
+                                    setSortBy("DATE_DESC");
+                                }}
+                                className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors py-1 px-2 rounded-md hover:bg-indigo-500/10"
+                            >
+                                Reset Filters
+                            </button>
+
+
+                        </div>
                     </div>
 
                     {/* Expense Cards */}
                     <div className="space-y-3">
-                        {filteredAndSortedExpenses.map((exp) => (
+                        {filteredAndSortedExpenses.map((exp, idx) => (
                             <div
                                 key={`${exp.id}-${exp.version}`}
                                 onClick={() => {
                                     setSelectedExpense(exp);
                                     setShowAddExpense(true);
                                 }}
-                                className="cursor-pointer bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-indigo-500 hover:bg-slate-800 transition">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <p className="font-medium">{exp.description}</p>
-                                        <span
-                                            className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full"
+                                className="group cursor-pointer glass-card rounded-xl p-4 md:p-5 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-indigo-500/10 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-2"
+                                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "both" }}>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
                                             style={{
-                                                backgroundColor: `${CATEGORY_COLORS[exp.category] || "#64748B"}20`,
-                                                color: CATEGORY_COLORS[exp.category] || "#64748B",
-                                            }}
-                                        >
-                                            {exp.category}
-                                        </span>
-                                        <p className="text-xs text-slate-500 mt-1 italic">
-                                            {exp.date}
-                                        </p>
+                                                backgroundColor: `${CATEGORY_COLORS[exp.category] || "#64748b"}20`,
+                                                border: `1px solid ${CATEGORY_COLORS[exp.category] || "#64748b"}40`
+                                            }}>
+                                            <span className="text-lg font-bold" style={{ color: CATEGORY_COLORS[exp.category] || "#64748b" }}>
+                                                {exp.category.charAt(0)}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-slate-200 group-hover:text-white transition-colors text-lg">{exp.description}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span
+                                                    className="inline-block px-2.5 py-0.5 text-xs rounded-full font-medium"
+                                                    style={{
+                                                        backgroundColor: `${CATEGORY_COLORS[exp.category] || "#64748B"}20`,
+                                                        color: CATEGORY_COLORS[exp.category] || "#64748B",
+                                                        border: `1px solid ${CATEGORY_COLORS[exp.category] || "#64748B"}40`
+                                                    }}
+                                                >
+                                                    {exp.category}
+                                                </span>
+                                                <span className="text-xs text-slate-500 font-medium">
+                                                    {exp.date}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <p
-                                        className={`font-semibold ${exp.transactionType === "CREDIT"
-                                            ? "text-emerald-400"
-                                            : "text-rose-400"
-                                            }`}
-                                    >
-                                        {exp.transactionType === "CREDIT" ? "+" : "-"} ₹
-                                        {Math.abs(exp.amount)}
-                                    </p>
+                                    <div className="text-right">
+                                        <p
+                                            className={`text-xl font-bold tracking-tight ${exp.transactionType === "CREDIT"
+                                                ? "text-emerald-400"
+                                                : "text-rose-400"
+                                                }`}
+                                        >
+                                            {exp.transactionType === "CREDIT" ? "+" : "-"}₹{Math.abs(exp.amount).toLocaleString('en-IN')}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ))}
+                        {filteredAndSortedExpenses.length === 0 && (
+                            <div className="glass-card rounded-2xl p-12 text-center text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-slate-500 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                <p className="text-lg font-medium">No expenses found</p>
+                                <p className="text-sm mt-1">Try changing your filters or add a new expense.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* RIGHT: Sticky Summary */}
-                <div className="hidden lg:block">
-                    <div className="sticky top-6 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                        <h3 className="text-lg font-semibold">Spending Overview</h3>
-                        <p className="text-xs text-slate-400">
-                            Current period · All recorded expenses
-                        </p>
-
-                        <div className="text-sm text-slate-400">
-                            <p>Total Expenses</p>
-                            <p className="text-2xl text-slate-100 font-semibold mt-1">
-                                {expenses.length}
+                <div className="hidden lg:block animate-in fade-in slide-in-from-right-8 duration-700 delay-150 fill-mode-both">
+                    <div className="sticky top-24 glass-card rounded-2xl p-6 space-y-6">
+                        <div>
+                            <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                                </svg>
+                                Spending Overview
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                                Current period · All recorded expenses
                             </p>
                         </div>
 
-                        <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
-                            <p>Net Balance</p>
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                                <p className="text-xs text-slate-400 font-medium">Total Income</p>
+                                <p className="text-lg font-bold text-emerald-400 mt-1">
+                                    +₹{totalIncome.toLocaleString('en-IN')}
+                                </p>
+                            </div>
+                            <div className="bg-slate-900/50 rounded-xl p-3 border border-white/5">
+                                <p className="text-xs text-slate-400 font-medium">Total Spending</p>
+                                <p className="text-lg font-bold text-rose-400 mt-1">
+                                    -₹{totalSpending.toLocaleString('en-IN')}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-4 border border-indigo-500/20 text-center">
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Net Balance</p>
                             <p
-                                className={`text-xl font-semibold mt-1 ${netTotal >= 0
+                                className={`text-3xl font-bold mt-1 tracking-tight ${netTotal >= 0
                                     ? "text-emerald-400"
                                     : "text-rose-400"
                                     }`}
                             >
-                                ₹{netTotal}
-                            </p>
-                        </div>
-
-                        <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
-                            <p>Total Income</p>
-                            <p className="text-xl text-emerald-400 font-semibold mt-1">
-                                + ₹{totalIncome}
-                            </p>
-                        </div>
-
-                        <div className="border-t border-slate-800 pt-4 text-sm text-slate-400">
-                            <p>Total Spending</p>
-                            <p className="text-xl text-rose-400 font-semibold mt-1">
-                                - ₹{totalSpending}
+                                {netTotal >= 0 ? "+" : ""}₹{netTotal.toLocaleString('en-IN')}
                             </p>
                         </div>
 
 
-
-                        <div>
-                            <p className="text-sm text-slate-400 mb-2">Top Category</p>
-
-                            {topCategory ? (
+                        {topCategory && (
+                            <div className="bg-slate-900/40 rounded-xl p-4 border border-white/5">
+                                <p className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Top Category</p>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-slate-100 font-medium">
-                                        {topCategory.name}
-                                    </span>
-                                    <span className="text-rose-400 font-semibold">
-                                        - ₹{topCategory.amount}
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[topCategory.name] || "#64748B" }}></span>
+                                        <span className="text-slate-200 font-semibold">
+                                            {topCategory.name}
+                                        </span>
+                                    </div>
+                                    <span className="text-rose-400 font-bold">
+                                        ₹{topCategory.amount.toLocaleString('en-IN')}
                                     </span>
                                 </div>
-                            ) : (
-                                <p className="text-slate-500 text-sm">No data yet</p>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         <div>
-                            <p className="text-sm text-slate-400 mb-3">Spending Breakdown</p>
+                            <p className="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Spending Breakdown</p>
 
-                            <div className="border-t border-slate-800 pt-4">
-                                <p className="text-sm text-slate-400 mb-3">
-                                    Category Distribution
-                                </p>
-
+                            <div className="bg-slate-900/40 border border-white/5 rounded-xl p-4 mb-4">
                                 <CategoryPie data={pieData} />
                             </div>
 
-
                             {categoryBreakdown.length === 0 ? (
-                                <p className="text-slate-500 text-sm">No data yet</p>
+                                <p className="text-slate-500 text-sm text-center py-2">No data yet</p>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     {categoryBreakdown.map((item, index) => (
-                                        <div key={item.category}>
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className="text-slate-300">
+                                        <div key={item.category} className="group">
+                                            <div className="flex justify-between text-xs mb-1.5 font-medium">
+                                                <span className="text-slate-300 group-hover:text-white transition-colors">
                                                     {item.category}
                                                 </span>
                                                 <span className="text-slate-400">
@@ -466,14 +492,13 @@ export default function ExpenseList() {
                                             </div>
 
                                             {/* Progress Bar */}
-                                            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                            <div className="h-1.5 w-full bg-slate-800/80 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-700`}
+                                                    className="h-full rounded-full transition-all duration-1000 ease-out"
                                                     style={{
                                                         width: `${item.percentage}%`,
                                                         backgroundColor: CATEGORY_COLORS[item.category] || "#64748B",
                                                     }}
-
                                                 />
                                             </div>
                                         </div>
@@ -481,51 +506,42 @@ export default function ExpenseList() {
                                 </div>
                             )}
                         </div>
-                        <div>
-                            <p className="text-sm text-slate-400 mb-2">Most Recent</p>
 
-
-                            {mostRecentExpense ? (
-                                <div className="text-sm">
-                                    <p className="text-slate-100">
-                                        {mostRecentExpense.description}
-                                    </p>
-                                    <p className="text-rose-500 text-xs">
-                                        {mostRecentExpense.transactionType === "CREDIT" ? "+" : "-"} ₹
-                                        {Math.abs(mostRecentExpense.amount)}  .  {mostRecentExpense.category}
-
-                                    </p>
-                                </div>
-                            ) : (
-                                <p className="text-slate-500 text-sm">No expenses yet</p>
-                            )}
-                        </div>
-
-                        <div className="border-t border-slate-800 pt-4">
-                            <p className="text-sm text-slate-400 mb-3">
+                        <div className="pt-2">
+                            <p className="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">
                                 Smart Insights
                             </p>
 
                             {insights.length === 0 ? (
-                                <p className="text-slate-500 text-sm">
-                                    Not enough data yet
+                                <p className="text-slate-500 text-sm italic text-center py-2">
+                                    Not enough data for insights
                                 </p>
                             ) : (
                                 <ul className="space-y-2 text-sm">
                                     {insights.map((insight, idx) => (
                                         <li
                                             key={idx}
-                                            className="bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-slate-200"
+                                            className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl px-3.5 py-2.5 text-indigo-100 flex items-start gap-2 text-xs font-medium leading-relaxed"
                                         >
-                                            {insight}
+                                            <span className="mt-0.5 opacity-80">{insight.split(' ')[0]}</span>
+                                            <span>{insight.substring(insight.indexOf(' ') + 1)}</span>
                                         </li>
                                     ))}
                                 </ul>
                             )}
                         </div>
 
-                        <button onClick={() => navigate("/insights")} disabled={expenses.length < 3} className="w-full bg-indigo-950 hover:bg-indigo-900 text-indigo-400 py-2 rounded-lg text-sm transition">
-                            Analyze Spending Patterns →
+                        <button
+                            onClick={() => navigate("/insights")}
+                            disabled={expenses.length < 3}
+                            className="w-full btn-secondary py-3 rounded-xl font-medium mt-2 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                        >
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                Analyze Spending Patterns
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </div>

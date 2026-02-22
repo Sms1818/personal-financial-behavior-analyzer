@@ -1,10 +1,18 @@
 import { ResponsiveBar } from "@nivo/bar";
 import { CATEGORY_COLORS } from "../utils/categoryColors";
-import { nivoDarkTheme } from "./NivoTheme";
 
 export default function CategorySpendBarChart({ expenses }) {
+    if (!expenses || expenses.length === 0) {
+        return (
+            <div className="text-slate-500 text-sm">
+                Not enough data to display chart
+            </div>
+        );
+    }
+
     const categoryMap = expenses.reduce((acc, e) => {
-        acc[e.category] = (acc[e.category] || 0) + Number(e.amount);
+        if (!e?.category) return acc;
+        acc[e.category] = (acc[e.category] || 0) + Math.abs(Number(e.amount || 0));
         return acc;
     }, {});
 
@@ -22,43 +30,61 @@ export default function CategorySpendBarChart({ expenses }) {
     }
 
     return (
-        <div style={{ height: 320 }}>
+        <div className="h-full w-full">
             <ResponsiveBar
                 data={data}
                 keys={['amount']}
                 indexBy="category"
-                margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
-                padding={0.35}
-                theme={nivoDarkTheme}
+                margin={{ top: 10, right: 20, bottom: 60, left: 50 }}
+                padding={0.3}
+                layout="vertical"
                 colors={({ indexValue }) =>
-                    CATEGORY_COLORS[indexValue] || "#64748b"
+                    CATEGORY_COLORS[indexValue] || "#8b5cf6"
                 }
+                borderRadius={4}
+                axisTop={null}
+                axisRight={null}
                 axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: -30,
-                    legend: "Category",
-                    legendPosition: "middle",
-                    legendOffset: 45,
+                    tickSize: 0,
+                    tickPadding: 10,
+                    tickRotation: -20,
+                    legend: "",
                 }}
                 axisLeft={{
-                    legend: "Amount (₹)",
-                    legendPosition: "middle",
-                    legendOffset: -50,
+                    tickSize: 0,
+                    tickPadding: 16,
+                    tickRotation: 0,
+                    legend: "",
+                    format: value => `₹${value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value}`
                 }}
                 enableLabel={false}
-                tooltip={({ value, indexValue }) => (
-                    <div className="bg-slate-900 px-3 py-2 rounded-md text-xs text-slate-200">
-                        <strong>{indexValue}</strong>
-                        <div>₹{value}</div>
+                enableGridY={true}
+                tooltip={({ value, indexValue, color }) => (
+                    <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/50 p-3 rounded-xl shadow-xl z-50 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200">
+                        <div
+                            className="w-3 h-3 rounded-full shadow-[0_0_8px_1px]"
+                            style={{ backgroundColor: color, boxShadow: `0 0 8px 1px ${color}40` }}
+                        />
+                        <div>
+                            <p className="text-slate-300 text-xs font-medium uppercase tracking-wider">{indexValue}</p>
+                            <p className="text-white font-bold text-sm tracking-tight">₹{Number(value).toLocaleString()}</p>
+                        </div>
                     </div>
                 )}
+                theme={{
+                    text: { fontFamily: "Inter, sans-serif", fontSize: 11 },
+                    axis: {
+                        ticks: {
+                            text: { fill: "#64748b", fontWeight: 500, },
+                        },
+                    },
+                    grid: {
+                        line: { stroke: "#334155", strokeWidth: 1, strokeDasharray: "4 4" },
+                    },
+                }}
                 animate
-                motionConfig="gentle"
+                motionConfig="wobbly"
             />
-
-
-
         </div>
     )
 }

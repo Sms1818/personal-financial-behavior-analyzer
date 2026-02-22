@@ -28,26 +28,32 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-            <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
-                <div>
-                    <h2 className="text-2xl font-semibold text-slate-100">
+        <div className="min-h-[80vh] flex items-center justify-center px-4">
+            <div className="w-full max-w-md glass-card rounded-2xl p-8 space-y-8 animate-in zoom-in-95 duration-500">
+                <div className="text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold tracking-tight text-white">
                         Welcome back
                     </h2>
-                    <p className="text-slate-400 text-sm mt-1">
+                    <p className="text-slate-400 text-sm mt-2">
                         Sign in to continue tracking your finances
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-rose-950/40 border border-rose-800 text-rose-300 text-sm px-3 py-2 rounded-lg">
+                    <div className="bg-rose-500/10 border border-rose-500/50 text-rose-300 text-sm px-4 py-3 rounded-xl animate-in fade-in flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm text-slate-400 mb-1">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-slate-300">
                             Email
                         </label>
                         <input
@@ -55,15 +61,13 @@ export default function Login() {
                             required
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg
-                         text-slate-100 placeholder-slate-500
-                         focus:outline-none focus:border-indigo-500"
+                            className="input-field"
                             placeholder="you@example.com"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm text-slate-400 mb-1">
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-slate-300">
                             Password
                         </label>
                         <input
@@ -71,9 +75,7 @@ export default function Login() {
                             required
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg
-                         text-slate-100 placeholder-slate-500
-                         focus:outline-none focus:border-indigo-500"
+                            className="input-field"
                             placeholder="••••••••"
                         />
                     </div>
@@ -81,24 +83,21 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50
-                       text-white py-2 rounded-lg text-sm transition"
+                        className="btn-primary w-full py-3 rounded-xl font-medium mt-6"
                     >
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
                 </form>
 
-                <p className="text-sm text-slate-400 text-center">
+                <p className="text-sm text-slate-400 text-center pt-4 border-t border-slate-800/50">
                     Don’t have an account?{" "}
                     <Link
                         to="/register"
-                        className="text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
+                        className="text-indigo-400 hover:text-indigo-300 font-medium hover:underline underline-offset-4 transition-all"
                     >
-                        Register
+                        Create one now
                     </Link>
                 </p>
-
-
 
             </div>
 
